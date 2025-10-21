@@ -448,8 +448,12 @@ def chatbot():
     if not user_input:
         return jsonify({"reply": "الرسالة فارغة!"})
 
+    # 👇 جرب نطبع المفتاح للتأكد أنه مقروء من البيئة
     print("🔑 OPENROUTER_API_KEY =", OPENROUTER_API_KEY)
 
+    if not OPENROUTER_API_KEY:
+        print("🚫 المفتاح غير موجود أو غير مقروء من البيئة!")
+        return jsonify({"reply": "⚠️ لم يتم العثور على مفتاح API في الخادم."})
 
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -471,25 +475,22 @@ def chatbot():
             "https://openrouter.ai/api/v1/chat/completions",
             headers=headers,
             json=payload,
-            timeout=15,   # ⏱️ أقصى مهلة للرد 15 ثانية فقط
+            timeout=15,
         )
+
+        print("📡 Status Code:", response.status_code)
+        print("📩 Response:", response.text[:500])  # نطبع أول 500 حرف من الرد
 
         if response.status_code == 200:
             data = response.json()
-            if "choices" in data and len(data["choices"]) > 0:
-                reply = data["choices"][0]["message"]["content"].strip()
-                return jsonify({"reply": reply})
-            else:
-                return jsonify({"reply": "لم يصل رد من نموذج الذكاء الاصطناعي."})
+            reply = data.get("choices", [{}])[0].get("message", {}).get("content", "لم يتم تلقي رد.")
+            return jsonify({"reply": reply})
         else:
-            print("❌ OpenRouter Error:", response.text)
-            return jsonify({"reply": "حدث خطأ في الخادم أثناء معالجة الطلب."})
+            return jsonify({"reply": f"حدث خطأ أثناء الاتصال بالذكاء الاصطناعي: {response.text}"}), 500
 
-    except requests.Timeout:
-        return jsonify({"reply": "الخادم تأخر في الرد، حاول مرة أخرى لاحقاً."})
     except Exception as e:
-        print("❌ chatbot error:", e)
-        return jsonify({"reply": "تعذر الاتصال بخدمة الذكاء الاصطناعي."})
+        print("🔥 chatbot error:", e)
+        return jsonify({"reply": f"خطأ داخلي في الخادم: {e}"}), 500
 
 
 # ============== التشغيل ==============
@@ -497,6 +498,7 @@ if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
