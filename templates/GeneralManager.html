@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>لوحة المدير العام | SEVENS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif;}
+    body{background:#f8fbff;color:#2c3e50;min-height:100vh;display:flex;}
+    .status-header{height:6px;}
+    .status-new{background:#2196f3;}
+    .status-assigned{background:#00bcd4;}
+    .status-in-progress{background:#ff9800;}
+    .status-on-hold{background:#ff5722;}
+    .status-closed{background:#4caf50;}
+    .status-rejected{background:#f44336;}
+    .card-content{padding:24px;}
+    .card-top{display:flex;justify-content:space-between;margin-bottom:14px;}
+    .request-id{font-weight:700;color:#1e88e5;font-size:18px;}
+    .request-date{color:#7f8c8d;font-size:14px;}
+    .request-title{font-size:20px;margin-bottom:12px;color:#2c3e50;font-weight:600;}
+    .request-desc{color:#555;margin-bottom:18px;line-height:1.6;font-size:15px;}
+    .request-meta{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:18px;font-size:14px;color:#34495e;}
+    .meta-item{display:flex;align-items:center;gap:6px;}
+    .logout-btn{background:#e3f2fd;color:#1976d2;border:none;padding:6px 14px;border-radius:8px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .logout-btn:hover{background:#bbdefb;}
+    .sidebar{width:250px;background:white;height:100vh;position:fixed;top:0;right:0;box-shadow:-2px 0 10px rgba(0,0,0,0.08);z-index:999;padding-top:70px;overflow-y:auto;}
+    .sidebar-header{padding:16px 20px;font-weight:700;color:#0d47a1;border-bottom:1px solid #eee;font-size:18px;}
+    .dept-list{list-style:none;padding:0;}
+    .dept-item{padding:14px 20px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:12px;border-right:3px solid transparent;}
+    .dept-item:hover{background:#f5f9ff;}
+    .dept-item.active{background:#e3f2fd;border-right:3px solid #1e88e5;color:#1e88e5;font-weight:600;}
+    .dept-item i{width:24px;text-align:center;}
+    .main-content{flex:1;margin-right:250px;padding:30px 20px 20px;margin-top:70px;}
+    .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
+    .page-title{font-size:26px;color:#0d47a1;font-weight:700;}
+    .new-request-btn{padding:10px 20px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:transform 0.2s,box-shadow 0.2s;}
+    .new-request-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(33,150,243,0.3);}
+    .requests-grid{display:grid;gap:20px;}
+    .request-card{background:white;border-radius:16px;padding:22px;box-shadow:0 4px 12px rgba(0,0,0,0.05);border:1px solid #f0f7ff;transition:all 0.2s ease;}
+    .request-card:hover{box-shadow:0 6px 16px rgba(30,136,229,0.1);}
+    .status-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;color:white;}
+    .status-info{font-size:13px;color:#555;}
+    .status-label{font-weight:600;color:#1e88e5;}
+    .no-requests{text-align:center;padding:40px;color:#7f8c8d;font-style:italic;font-size:16px;}
+    .request-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;}
+    .request-modal-content{background:white;width:90%;max-width:500px;border-radius:16px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
+    .form-group{margin-bottom:20px;}
+    .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#34495e;}
+    .form-control{width:100%;padding:12px;border:2px solid #e3f2fd;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:15px;direction:rtl;}
+    .submit-btn{width:100%;padding:12px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;font-size:16px;cursor:pointer;}
+    .submit-btn:hover{background:linear-gradient(to right,#1e88e5,#1565c0);}
+    .chatbot-float-btn{position:fixed;bottom:30px;left:30px;width:60px;height:60px;background:linear-gradient(to right,#2196f3,#1976d2);border-radius:50%;display:flex;justify-content:center;align-items:center;color:white;font-size:24px;cursor:pointer;box-shadow:0 4px 12px rgba(33,150,243,0.4);z-index:999;transition:transform 0.2s;}
+    .chatbot-float-btn:hover{transform:scale(1.1);}
+    /* زر الشات + نافذة مصغّرة (يمين/أسفل) */
+    .chatbot-float-btn{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:linear-gradient(135deg,#1976d2,#42a5f5);border-radius:50%;display:flex;justify-content:center;align-items:center;color:white;font-size:22px;cursor:pointer;box-shadow:0 8px 24px rgba(25,118,210,.35);z-index:1500;}
+    .chatbot-widget{position:fixed;bottom:88px;right:24px;width:360px;max-height:540px;background:#fff;border:1px solid #e6eefc;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.12);display:flex;flex-direction:column;overflow:hidden;z-index:1500;}
+    .hidden{display:none!important;}
+    .cb-header{background:linear-gradient(90deg,#1976d2,#1e88e5);color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;}
+    .cb-title{display:flex;align-items:center;gap:8px;font-weight:700}
+    .cb-close{background:transparent;border:none;color:#fff;font-size:16px;cursor:pointer}
+    .cb-body{padding:10px;height:100%;overflow:auto;display:flex;flex-direction:column;gap:8px;background:#f8fbff}
+    .cb-msg{max-width:85%;padding:8px 10px;border-radius:12px;line-height:1.5;font-size:14px;white-space:pre-wrap}
+    .cb-msg.user{align-self:flex-end;background:#e3f2fd;border-top-left-radius:4px}
+    .cb-msg.bot{align-self:flex-start;background:#ffffff;border:1px solid #ecf2ff;border-top-right-radius:4px}
+    .cb-input{padding:8px;border-top:1px solid #e6eefc;background:#fff;display:flex;gap:8px;align-items:flex-end}
+    .cb-input textarea{flex:1;resize:none;min-height:40px;max-height:120px;padding:8px;border:2px solid #e6eefc;border-radius:10px;font-size:14px;direction:rtl}
+    .cb-send{padding:9px 12px;background:#1976d2;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+    .cb-send:disabled{opacity:.6;cursor:not-allowed}
+    .cb-typing{align-self:flex-start;color:#888;font-size:12px;display:flex;align-items:center;gap:6px}
+    .cb-typing .dots{letter-spacing:2px;animation:blink 1.4s infinite}
+    @keyframes blink{0%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <select id="deptSelect" class="form-control" onchange="renderRequests(this.value)">
+    <option value="all">جميع الطلبات</option>
+    <optgroup label="الإدارات الرئيسية">
+      <option>الإدارة العامة</option>
+      <option>الإدارة الإدارية</option>
+      <option>الإدارة المالية</option>
+      <option>إدارة المراجعة</option>
+      <option>إدارة تحليل البيانات</option>
+      <option>إدارة الموارد البشرية</option>
+      <option>إدارة تقنية المعلومات</option>
+      <option>إدارة التسويق</option>
+      <option>إدارة التشغيل</option>
+      <option>إدارة مكتب التأجير</option>
+      <option>إدارة الصيانة وقطع الغيار</option>
+      <option>إدارة المبيعات</option>
+      <option>إدارة المخزون - مستودع السيارات</option>
+    </optgroup>
+    <optgroup label="فروع المدينة">
+      <option>إدارة المبيعات الهاتفية - المدينة</option>
+      <option>قسم المبيعات الهاتفية</option>
+      <option>مبيعات الصالة - المدينة</option>
+      <option>قسم مبيعات الصالة المدينة المنورة</option>
+      <option>قسم النظافة والاستقبال المدينة</option>
+      <option>قسم الخدمات</option>
+      <option>قسم الاستقبال والنظافة</option>
+      <option>قسم المشتريات</option>
+      <option>قسم الخدمات - فني صيانة</option>
+    </optgroup>
+    <optgroup label="فروع الرياض">
+      <option>إدارة فرع الرياض 1</option>
+      <option>قسم مبيعات الصالة الرياض 1</option>
+      <option>قسم النظافة والاستقبال الرياض 1</option>
+      <option>إدارة فرع الرياض 2</option>
+      <option>قسم مبيعات الصالة الرياض 2</option>
+      <option>قسم النظافة والاستقبال الرياض 2</option>
+      <option>إدارة المبيعات الهاتفية - الرياض</option>
+      <option>قسم المبيعات الهاتفية الرياض</option>
+      <option>قسم النظافة والاستقبال الرياض</option>
+    </optgroup>
+    <optgroup label="فرع جدة">
+      <option>إدارة فرع جدة</option>
+      <option>قسم مبيعات الصالة - جدة</option>
+      <option>قسم النظافة والاستقبال جدة</option>
+    </optgroup>
+  </select>
+</div>
+
+<div class="main-content">
+  <nav class="navbar">
+    <div class="logo-box">
+      <h1>نظام إدارة الطلبات</h1>
+    </div>
+    <div class="user-info">
+      <span id="userWelcome">جارٍ التحميل...</span>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h2 class="page-title" id="sectionTitle">جميع الطلبات</h2>
+    <button class="new-request-btn" onclick="openNewRequestModal()"><i class="fas fa-plus"></i> رفع طلب جديد</button>
+  </div>
+
+  <div class="requests-grid" id="requestsContainer"><div class="no-requests">جارٍ التحميل...</div></div>
+</div>
+
+<div class="request-modal" id="newRequestModal">
+  <div class="request-modal-content">
+    <h3 class="modal-title">رفع طلب جديد</h3>
+    <form id="newRequestForm">
+      <div class="form-group">
+        <label>عنوان الطلب</label>
+        <input id="requestTitle" class="form-control" required />
+      </div>
+      <div class="form-group">
+        <label>وصف الطلب</label>
+        <textarea id="requestDesc" class="form-control" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>القسم المستلم</label>
+        <select id="targetDept" class="form-control" required></select>
+      </div>
+      <button type="submit" class="submit-btn">إرسال الطلب</button>
+    </form>
+  </div>
+</div>
+
+<!-- زر الشات العائم -->
+<div class="chatbot-float-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
+
+<!-- نافذة الشات المصغّرة -->
+<div id="chatbotWidget" class="chatbot-widget hidden" aria-live="polite">
+  <div class="cb-header">
+    <div class="cb-title"><i class="fas fa-robot"></i> مساعد SEVENS</div>
+    <button class="cb-close" onclick="toggleChat(false)" title="إغلاق"><i class="fas fa-times"></i></button>
+  </div>
+  <div id="cbBody" class="cb-body"></div>
+  <div class="cb-input">
+    <textarea id="cbInput" placeholder="اكتب رسالتك... (Enter للإرسال، Shift+Enter لسطر جديد)"></textarea>
+    <button id="cbSend" class="cb-send" onclick="sendChat()">إرسال</button>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const u = localStorage.getItem('currentUser');
+  if (!u) return location.href = 'Login.html';
+  currentUser = JSON.parse(u);
+  if (currentUser.role !== 'مدير عام') return location.href = 'Login.html';
+  document.getElementById('userWelcome').textContent = `مرحباً، ${currentUser.name}`;
+  await loadDepartments();
+  await renderRequests('all');
+});
+
+async function loadDepartments() {
+  try {
+    const res = await fetch('/api/get_departments');
+    const depts = await res.json();
+    const select = document.getElementById('targetDept');
+    depts.forEach(d => {
+      if (!d) return;
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      select.appendChild(opt);
+    });
+  } catch (e) { console.log('loadDepartments error', e); }
+}
+
+async function fetchRequests() {
+  const res = await fetch('/api/get_requests', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({role: 'مدير عام', department: ''})
+  });
+  return await res.json();
+}
+
+async function renderRequests(dept) {
+  const c = document.getElementById('requestsContainer');
+  const data = await fetchRequests();
+  const filtered = dept === 'all'
+    ? data
+    : data.filter(r => r['القسم المستلم'] === dept);
+
+  document.getElementById('sectionTitle').textContent =
+    dept === 'all' ? 'جميع الطلبات' : `طلبات قسم: ${dept}`;
+
+  if (!filtered.length) {
+    c.innerHTML = '<div class="no-requests">لا توجد طلبات لهذا القسم</div>';
+    return;
+  }
+
+  c.innerHTML = filtered.map(r => `
+    <div class="request-card">
+      <div class="card-top">
+        <div class="request-id">#${r['رقم الطلب']}</div>
+        <div class="request-date">${r['التاريخ']}</div>
+      </div>
+      <h3 class="request-title">${r['العنوان']}</h3>
+      <p class="request-desc">${r['الوصف']}</p>
+      <div class="request-meta">
+        <div class="meta-item"><i class="fas fa-building"></i> ${r['القسم المرسل']}</div>
+        <div class="meta-item"><i class="fas fa-building"></i> ${r['القسم المستلم']}</div>
+      </div>
+      <div><span class="status-badge status-${mapStatus(r['الحالة'])}">${r['الحالة']}</span></div>
+      <div class="status-info"><span class="status-label">آخر تحديث:</span> ${r['آخر تحديث بواسطة']}</div>
+    </div>
+  `).join('');
+}
+
+function mapStatus(s) {
+  if (s.includes('جديد')) return 'new';
+  if (s.includes('مغلق')) return 'closed';
+  if (s.includes('جاري')) return 'in-progress';
+  if (s.includes('مرفوض')) return 'rejected';
+  return 'assigned';
+}
+
+document.getElementById('newRequestForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const t = requestTitle.value.trim(), d = requestDesc.value.trim(), dept = targetDept.value;
+  if (!t || !d || !dept) return alert('يرجى تعبئة جميع الحقول');
+  const res = await fetch('/api/create_request', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      title: t, description: d, targetDept: dept,
+      senderDept: 'المدير العام', senderName: currentUser.name
+    })
+  });
+  const j = await res.json();
+  if (j.success) {
+    alert('✅ تم رفع الطلب');
+    closeNewRequestModal();
+    renderRequests('all');
+  } else alert('❌ فشل رفع الطلب');
+});
+
+function openNewRequestModal() { newRequestModal.style.display = 'flex'; }
+function closeNewRequestModal() { newRequestModal.style.display = 'none'; }
+window.onclick = e => { if (e.target === newRequestModal) closeNewRequestModal(); }
+
+function logout() {
+  if (confirm('هل أنت متأكد أنك تريد تسجيل الخروج؟')) {
+    try {
+      localStorage.removeItem('currentUser');
+      if (!localStorage.getItem('currentUser')) {
+        alert('تم تسجيل الخروج بنجاح ✅');
+        window.location.href = 'Login.html';
+      } else alert('حدث خطأ أثناء تسجيل الخروج.');
+    } catch (e) {
+      console.error('Logout Error:', e);
+      alert('حدث خطأ أثناء تنفيذ عملية الخروج.');
+    }
+  }
+}
+
+ // ===================== 🔹 نظام الشات بوت الجديد =====================
+const chatWidget = document.getElementById("chatbotWidget");
+const chatBody = document.getElementById("cbBody");
+const chatInput = document.getElementById("cbInput");
+const chatSend = document.getElementById("cbSend");
+
+function toggleChat(forceState) {
+  if (typeof forceState === "boolean") {
+    chatWidget.classList.toggle("hidden", !forceState);
+  } else {
+    chatWidget.classList.toggle("hidden");
+  }
+  if (!chatWidget.classList.contains("hidden")) chatInput.focus();
+}
+
+async function sendChat() {
+  const msg = chatInput.value.trim();
+  if (!msg) return;
+
+  appendMessage(msg, "user");
+  chatInput.value = "";
+  chatInput.style.height = "auto";
+
+  appendTyping();
+  try {
+    const res = await fetch("/chatbot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg }),
+    });
+    const data = await res.json();
+    removeTyping();
+    appendMessage(data.reply || "لم أتمكن من الرد حالياً.", "bot");
+  } catch (e) {
+    removeTyping();
+    appendMessage("حدث خطأ أثناء الاتصال بالخادم.", "bot");
+  }
+}
+
+// دوال مساعدة للرسائل
+function appendMessage(text, sender = "bot") {
+  const div = document.createElement("div");
+  div.className = `cb-msg ${sender}`;
+  div.textContent = text;
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function appendTyping() {
+  const div = document.createElement("div");
+  div.className = "cb-typing";
+  div.id = "typing";
+  div.innerHTML = `<i class="fas fa-robot"></i> <span class="dots">...</span>`;
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function removeTyping() {
+  const typing = document.getElementById("typing");
+  if (typing) typing.remove();
+}
+
+// إرسال بالزر أو Enter
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+});
+chatSend.addEventListener("click", sendChat);
+
+</script>
+</body>
+</html>

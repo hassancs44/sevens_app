@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>لوحة الموظف | SEVENS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif;}
+    body{background:#f8fbff;color:#2c3e50;min-height:100vh;}
+    .navbar{background:white;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,0.06);position:sticky;top:0;z-index:100;}
+    .logo-box{display:flex;align-items:center;gap:14px;}
+    .logo-box img{width:44px;height:44px;object-fit:contain;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+    .logo-box h1{color:#1e88e5;font-size:22px;font-weight:700;}
+    .user-info{display:flex;align-items:center;gap:12px;color:#34495e;font-weight:600;}
+    .logout-btn{background:#e3f2fd;color:#1976d2;border:none;padding:6px 14px;border-radius:8px;font-weight:600;cursor:pointer;transition:all .2s;}
+    .logout-btn:hover{background:#bbdefb;}
+    .container{max-width:1100px;margin:30px auto;padding:0 20px;}
+    .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
+    .page-title{font-size:26px;color:#0d47a1;font-weight:700;}
+    .new-request-btn{padding:10px 20px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:transform .2s,box-shadow .2s;}
+    .new-request-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(33,150,243,0.3);}
+    .requests-grid{display:grid;gap:22px;}
+    .request-card{background:white;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #eef5ff;transition:all .3s;}
+    .request-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(30,136,229,0.12);}
+    .status-header{height:6px;}
+    .status-جديد{background:#2196f3;}
+    .status-قيد-المراجعة{background:#9c27b0;}
+    .status-جاري-التنفيذ{background:#ff9800;}
+    .status-معلق{background:#ff5722;}
+    .status-مغلق{background:#4caf50;}
+    .status-مرفوض{background:#f44336;}
+    .card-content{padding:24px;}
+    .card-top{display:flex;justify-content:space-between;margin-bottom:14px;}
+    .request-id{font-weight:700;color:#1e88e5;font-size:18px;}
+    .request-date{color:#7f8c8d;font-size:14px;}
+    .request-title{font-size:20px;margin-bottom:12px;color:#2c3e50;font-weight:600;}
+    .request-desc{color:#555;margin-bottom:18px;line-height:1.6;font-size:15px;}
+    .request-meta{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:18px;font-size:14px;color:#34495e;}
+    .meta-item{display:flex;align-items:center;gap:6px;}
+    .status-info{background:#f9fbfd;padding:12px;border-radius:12px;margin-bottom:18px;font-size:14px;color:#34495e;}
+    .status-label{font-weight:600;color:#1e88e5;}
+    .update-section{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+    .status-select{padding:8px 12px;border:2px solid #e3f2fd;border-radius:10px;font-size:14px;background:white;color:#333;direction:rtl;min-width:160px;}
+    .save-btn{padding:8px 18px;background:#1e88e5;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
+    .save-btn:hover{background:#1976d2;}
+    .request-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;}
+    .request-modal-content{background:white;width:90%;max-width:500px;border-radius:16px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
+    .form-group{margin-bottom:20px;}
+    .form-control{width:100%;padding:12px;border:2px solid #e3f2fd;border-radius:12px;font-size:15px;direction:rtl;}
+    .submit-btn{width:100%;padding:12px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;font-size:16px;cursor:pointer;}
+    .submit-btn:hover{background:linear-gradient(to right,#1e88e5,#1565c0);}
+    .timer-text{font-weight:700;color:#2e7d32;background:#e8f5e9;padding:6px 12px;border-radius:10px;display:inline-block;margin-top:6px;animation:pulse 1.5s infinite;}
+    @keyframes pulse{0%{background-color:#e8f5e9;}50%{background-color:#c8e6c9;}100%{background-color:#e8f5e9;}}
+
+    /* ===== زر الشات العائم والنافذة المصغّرة ===== */
+    .chatbot-float-btn{
+      position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;
+      background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 8px 24px rgba(25,118,210,.35);cursor:pointer;z-index:2000;transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .chatbot-float-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(25,118,210,.45);}
+    .chatbot-float-btn i{font-size:22px;}
+
+    .chatbot-widget{
+      position:fixed;bottom:86px;right:20px;width:340px;max-height:520px;background:#fff;border:1px solid #e6eefc;border-radius:16px;
+      box-shadow:0 14px 40px rgba(0,0,0,.12);display:flex;flex-direction:column;overflow:hidden;z-index:2000;
+    }
+    .hidden{display:none !important;}
+    .cb-header{background:linear-gradient(90deg,#1976d2,#1e88e5);color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;}
+    .cb-title{display:flex;align-items:center;gap:8px;font-weight:700}
+    .cb-title i{opacity:.9}
+    .cb-close{background:transparent;border:none;color:#fff;font-size:16px;cursor:pointer}
+    .cb-body{padding:10px;height:100%;overflow:auto;display:flex;flex-direction:column;gap:8px;background:#f8fbff}
+    .cb-msg{max-width:85%;padding:8px 10px;border-radius:12px;line-height:1.5;font-size:14px;white-space:pre-wrap}
+    .cb-msg.user{align-self:flex-end;background:#e3f2fd;border-top-left-radius:4px}
+    .cb-msg.bot{align-self:flex-start;background:#ffffff;border:1px solid #ecf2ff;border-top-right-radius:4px}
+    .cb-input{padding:8px;border-top:1px solid #e6eefc;background:#fff;display:flex;gap:8px;align-items:flex-end}
+    .cb-input textarea{flex:1;resize:none;min-height:40px;max-height:120px;padding:8px;border:2px solid #e6eefc;border-radius:10px;font-size:14px;direction:rtl}
+    .cb-send{padding:9px 12px;background:#1976d2;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+    .cb-send:disabled{opacity:.6;cursor:not-allowed}
+    .cb-typing{align-self:flex-start;color:#888;font-size:12px;display:flex;align-items:center;gap:6px}
+    .cb-typing .dots{letter-spacing:2px;animation:blink 1.4s infinite}
+    @keyframes blink{0%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo-box">
+      <img src="{{ url_for('static', filename='7s.jpg') }}" alt="شعار SEVENS" />
+      <h1>نظام إدارة الطلبات</h1>
+    </div>
+    <div class="user-info">
+      <span id="userWelcome">جارٍ التحميل...</span>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h2 class="page-title" id="pageTitle">طلبات الأقسام الأخرى</h2>
+      <button class="new-request-btn" onclick="openNewRequestModal()"><i class="fas fa-plus"></i> رفع طلب جديد</button>
+    </div>
+    <div class="requests-grid" id="requestsContainer">
+      <div class="loading-message">جارٍ تحميل الطلبات...</div>
+    </div>
+  </div>
+
+  <!-- نافذة رفع طلب جديد -->
+  <div class="request-modal" id="newRequestModal">
+    <div class="request-modal-content">
+      <h3 class="modal-title">رفع طلب جديد</h3>
+      <form id="newRequestForm">
+        <div class="form-group">
+          <label>عنوان الطلب</label>
+          <input type="text" id="requestTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>وصف الطلب</label>
+          <textarea id="requestDesc" class="form-control" rows="4" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>القسم المستلم</label>
+          <select id="targetDept" class="form-control" required>
+            <option value="">اختر القسم</option>
+            <optgroup label="الإدارات الرئيسية">
+              <option>الإدارة العامة</option>
+              <option>الإدارة الإدارية</option>
+              <option>الإدارة المالية</option>
+              <option>إدارة المراجعة</option>
+              <option>إدارة تحليل البيانات</option>
+              <option>إدارة الموارد البشرية</option>
+              <option>إدارة تقنية المعلومات</option>
+              <option>إدارة التسويق</option>
+              <option>إدارة التشغيل</option>
+              <option>إدارة مكتب التأجير</option>
+              <option>إدارة الصيانة وقطع الغيار</option>
+              <option>إدارة المبيعات</option>
+              <option>إدارة المخزون - مستودع السيارات</option>
+            </optgroup>
+            <optgroup label="فروع المدينة">
+              <option>إدارة المبيعات الهاتفية - المدينة</option>
+              <option>قسم المبيعات الهاتفية</option>
+              <option>مبيعات الصالة - المدينة</option>
+              <option>قسم مبيعات الصالة المدينة المنورة</option>
+              <option>قسم النظافة والاستقبال المدينة</option>
+              <option>قسم الخدمات</option>
+              <option>قسم الاستقبال والنظافة</option>
+              <option>قسم المشتريات</option>
+              <option>قسم الخدمات - فني صيانة</option>
+            </optgroup>
+            <optgroup label="فروع الرياض">
+              <option>إدارة فرع الرياض 1</option>
+              <option>قسم مبيعات الصالة الرياض 1</option>
+              <option>قسم النظافة والاستقبال الرياض 1</option>
+              <option>إدارة فرع الرياض 2</option>
+              <option>قسم مبيعات الصالة الرياض 2</option>
+              <option>قسم النظافة والاستقبال الرياض 2</option>
+              <option>إدارة المبيعات الهاتفية - الرياض</option>
+              <option>قسم المبيعات الهاتفية الرياض</option>
+              <option>قسم النظافة والاستقبال الرياض</option>
+            </optgroup>
+            <optgroup label="فرع جدة">
+              <option>إدارة فرع جدة</option>
+              <option>قسم مبيعات الصالة - جدة</option>
+              <option>قسم النظافة والاستقبال جدة</option>
+            </optgroup>
+          </select>
+        </div>
+        <button type="submit" class="submit-btn">إرسال الطلب</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- زر الشات العائم -->
+  <div class="chatbot-float-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
+
+<!-- نافذة الشات -->
+<div id="chatbotWidget" class="chatbot-widget hidden" aria-live="polite">
+  <div class="cb-header">
+    <div class="cb-title"><i class="fas fa-robot"></i> مساعد SEVENS</div>
+    <button class="cb-close" onclick="toggleChat(false)" title="إغلاق"><i class="fas fa-times"></i></button>
+  </div>
+  <div id="cbBody" class="cb-body"></div>
+  <div class="cb-input">
+    <textarea id="cbInput" placeholder="اكتب رسالتك... (Enter للإرسال، Shift+Enter لسطر جديد)"></textarea>
+    <button id="cbSend" class="cb-send" onclick="sendChat()">إرسال</button>
+  </div>
+</div>
+
+<script>
+let currentUser=null;
+let activeTimers={};
+
+/* ========= تحميل بيانات المستخدم و الطلبات ========= */
+document.addEventListener('DOMContentLoaded',()=>{
+  const userData=localStorage.getItem('currentUser');
+  if(!userData){ location.href='Login.html'; return; }
+  currentUser=JSON.parse(userData);
+  if(currentUser.role!=='موظف'){ location.href='Login.html'; return; }
+
+  document.getElementById('userWelcome').textContent=`مرحباً، ${currentUser.name} (${currentUser.department})`;
+  document.getElementById('pageTitle').textContent=`طلبات الأقسام الأخرى (قسمك: ${currentUser.department})`;
+  loadRequestsForUser(currentUser.department);
+
+  // شات: رسالة ترحيبية عند أول فتح
+  const body=document.getElementById('cbBody');
+  if(body && body.childElementCount===0){
+    appendMsg('bot','مرحباً! أنا مساعد SEVENS. اسألني أي شيء 🎯');
+  }
+
+  // إدخال الشات: Enter للإرسال
+  const ta=document.getElementById('cbInput');
+  ta.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendChat();
+    }
+  });
+});
+
+/* ========= تحميل الطلبات ========= */
+async function loadRequestsForUser(dept){
+  const c=document.getElementById('requestsContainer');
+  c.innerHTML='<div class="loading-message">جارٍ تحميل الطلبات...</div>';
+  try{
+    const res=await fetch('/api/get_requests',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({role:'موظف',department:dept})
+    });
+    const data=await res.json();
+    if(!Array.isArray(data) || !data.length){
+      c.innerHTML='<div class="loading-message">لا توجد طلبات حالياً.</div>';return;
+    }
+    c.innerHTML=data.map(r=>`
+      <div class="request-card">
+        <div class="status-header status-${(r['الحالة']||'').replace(/\s+/g,'-')}"></div>
+        <div class="card-content">
+          <div class="card-top">
+            <div class="request-id">#${r['رقم الطلب']||''}</div>
+            <div class="request-date">${r['التاريخ']||''}</div>
+          </div>
+          <h3 class="request-title">${r['العنوان']||''}</h3>
+          <p class="request-desc">${r['الوصف']||''}</p>
+          <div class="status-info">
+            <div><span class="status-label">الحالة:</span> ${r['الحالة']||''}</div>
+            ${r['الحالة']==='جاري التنفيذ'
+              ?`<div><span class="status-label">الوقت:</span> <span id="timer-${r['رقم الطلب']}" class="timer-text">00:00:00</span></div>`
+              :''}
+          </div>
+          <div class="update-section">
+            <select class="status-select" id="status-${r['رقم الطلب']}">
+              ${['جديد','قيد المراجعة','جاري التنفيذ','معلق','مغلق','مرفوض'].map(s=>`<option ${s===(r['الحالة']||'')?'selected':''}>${s}</option>`).join('')}
+            </select>
+            <button class="save-btn" onclick="saveStatus('${r['رقم الطلب']}')">حفظ الحالة</button>
+          </div>
+        </div>
+      </div>`).join('');
+
+    data.forEach(r=>{
+      if(r['الحالة']==='جاري التنفيذ' && localStorage.getItem(`startTime_${r['رقم الطلب']}`)){
+        startLiveTimer(r['رقم الطلب']);
+      }
+    });
+  }catch(e){
+    console.error(e);
+    c.innerHTML='<div class="error-message">فشل تحميل الطلبات</div>';
+  }
+}
+
+/* ========= حفظ الحالة + المؤقت ========= */
+async function saveStatus(id){
+  const select=document.getElementById(`status-${id}`);
+  if(!select) return;
+  const s=select.value;
+  const startKey=`startTime_${id}`;
+  let duration=null;
+
+  if(s==="جاري التنفيذ" && !localStorage.getItem(startKey)){
+    localStorage.setItem(startKey,new Date().toISOString());
+    startLiveTimer(id);
+  }
+  if(s==="مغلق" && localStorage.getItem(startKey)){
+    const diff=Date.now()-new Date(localStorage.getItem(startKey)).getTime();
+    const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),sec=Math.floor((diff%60000)/1000);
+    duration=`${h} ساعة و ${m} دقيقة و ${sec} ثانية`;
+    clearInterval(activeTimers[id]);delete activeTimers[id];
+    localStorage.removeItem(startKey);
+  }
+
+  const res=await fetch('/api/update_request_status',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({requestId:id,status:s,updater:currentUser.name,duration})
+  });
+  const d=await res.json();
+  if(d && d.success){ alert("تم التحديث بنجاح ✅"); loadRequestsForUser(currentUser.department); }
+}
+
+function startLiveTimer(id){
+  const startKey=`startTime_${id}`;
+  const el=document.getElementById(`timer-${id}`); if(!el) return;
+  function update(){
+    const start=localStorage.getItem(startKey); if(!start) return;
+    const diff=Date.now()-new Date(start).getTime();
+    const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+    el.textContent=`${h} ساعة و ${m} دقيقة و ${s} ثانية`;
+  }
+  update();
+  if(activeTimers[id]) clearInterval(activeTimers[id]);
+  activeTimers[id]=setInterval(update,1000);
+}
+
+/* ========= إنشاء طلب جديد ========= */
+document.getElementById('newRequestForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const t=document.getElementById('requestTitle').value.trim();
+  const d=document.getElementById('requestDesc').value.trim();
+  const dept=document.getElementById('targetDept').value;
+  if(!t||!d||!dept){ alert("يرجى ملء جميع الحقول"); return; }
+
+  const res=await fetch('/api/create_request',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      title:t,description:d,targetDept:dept,
+      senderDept:currentUser.department,senderName:currentUser.name
+    })
+  });
+  const x=await res.json();
+  if(x && x.success){
+    alert("تم رفع الطلب بنجاح ✅");
+    closeNewRequestModal();
+    loadRequestsForUser(currentUser.department);
+    e.target.reset();
+  }
+});
+
+function openNewRequestModal(){document.getElementById('newRequestModal').style.display='flex';}
+function closeNewRequestModal(){document.getElementById('newRequestModal').style.display='none';}
+function logout(){if(confirm("تأكيد تسجيل الخروج؟")){localStorage.removeItem('currentUser');location.href='Login.html';}}
+
+// ===================== 🔹 نظام الشات بوت الجديد =====================
+const chatWidget = document.getElementById("chatbotWidget");
+const chatBody = document.getElementById("cbBody");
+const chatInput = document.getElementById("cbInput");
+const chatSend = document.getElementById("cbSend");
+
+function toggleChat(forceState) {
+  if (typeof forceState === "boolean") {
+    chatWidget.classList.toggle("hidden", !forceState);
+  } else {
+    chatWidget.classList.toggle("hidden");
+  }
+  if (!chatWidget.classList.contains("hidden")) chatInput.focus();
+}
+
+async function sendChat() {
+  const msg = chatInput.value.trim();
+  if (!msg) return;
+
+  appendMessage(msg, "user");
+  chatInput.value = "";
+  chatInput.style.height = "auto";
+
+  appendTyping();
+  try {
+    const res = await fetch("/chatbot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg }),
+    });
+    const data = await res.json();
+    removeTyping();
+    appendMessage(data.reply || "لم أتمكن من الرد حالياً.", "bot");
+  } catch (e) {
+    removeTyping();
+    appendMessage("حدث خطأ أثناء الاتصال بالخادم.", "bot");
+  }
+}
+
+// دوال مساعدة للرسائل
+function appendMessage(text, sender = "bot") {
+  const div = document.createElement("div");
+  div.className = `cb-msg ${sender}`;
+  div.textContent = text;
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function appendTyping() {
+  const div = document.createElement("div");
+  div.className = "cb-typing";
+  div.id = "typing";
+  div.innerHTML = `<i class="fas fa-robot"></i> <span class="dots">...</span>`;
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function removeTyping() {
+  const typing = document.getElementById("typing");
+  if (typing) typing.remove();
+}
+
+// إرسال بالزر أو Enter
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+});
+chatSend.addEventListener("click", sendChat);
+
+</script>
+</body>
+</html>

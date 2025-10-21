@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>تسجيل الدخول | SEVENS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e88e5, #29b6f6);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      z-index: -1;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 420px;
+      padding: 40px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 10;
+    }
+
+    .logo-box {
+      width: 120px;
+      height: 120px;
+      background: white;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      margin: 0 auto 30px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .logo-box:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .logo-box img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border-radius: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    .logo-box:hover img {
+      transform: scale(1.05);
+    }
+
+    .login-title {
+      color: #0d47a1;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      letter-spacing: 0.5px;
+    }
+
+    .input-field {
+      position: relative;
+      margin-bottom: 20px;
+      text-align: right;
+    }
+
+    .input-field input {
+      width: 100%;
+      padding: 14px 20px;
+      border: 2px solid #e3f2fd;
+      border-radius: 14px;
+      font-size: 16px;
+      direction: rtl;
+      outline: none;
+      transition: all 0.3s ease;
+      background: #fafafa;
+      font-weight: 500;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    }
+
+    .input-field input:focus {
+      border-color: #2196f3;
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1), 0 4px 10px rgba(33, 150, 243, 0.05);
+    }
+
+    .input-field input:valid {
+      border-color: #4caf50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+
+    .toggle-password {
+      cursor: pointer;
+      color: #64b5f6;
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(to right, #2196f3, #1976d2);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+    }
+
+    .btn-login:hover {
+      background: linear-gradient(to right, #1e88e5, #1565c0);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(33, 150, 243, 0.4);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .footer-links {
+      margin-top: 25px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .footer-links a {
+      color: #2196f3;
+      text-decoration: none;
+      margin: 0 8px;
+      font-weight: 500;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+      color: #0d47a1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+
+    <div class="logo-box">
+      <img src="{{ url_for('static', filename='7s.jpg') }}" alt="شعار SEVENS" />
+    </div>
+
+    <div class="login-title">نظام إدارة الطلبات</div>
+
+    <div class="input-field">
+      <input type="email" id="email" placeholder="البريد الإلكتروني" autocomplete="email" required />
+    </div>
+
+    <div class="input-field">
+      <input type="password" id="password" placeholder="كلمة المرور" autocomplete="current-password" required />
+      <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+    </div>
+
+    <button class="btn-login" id="loginBtn">تسجيل الدخول</button>
+
+    <div class="footer-links">
+      <a href="ForgotYourPassword.html">نسيت كلمة المرور؟</a>
+    </div>
+  </div>
+
+  <script>
+    // تبديل إظهار/إخفاء كلمة المرور
+    document.getElementById('togglePassword').addEventListener('click', function () {
+      const passwordField = document.getElementById('password');
+      const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordField.setAttribute('type', type);
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+    });
+
+    // الضغط على Enter للتسجيل مباشرة
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') login();
+    });
+
+    // دالة تسجيل الدخول
+    function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !password) {
+        alert('يرجى ملء جميع الحقول');
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alert('الرجاء إدخال بريد إلكتروني صحيح');
+        return;
+      }
+
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.user) {
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+          const role = data.user.role;
+
+          if (role === 'موظف') {
+            window.location.href = 'EmployeePage.html';
+          } else if (role === 'مدير قسم') {
+            window.location.href = 'DepartmentManagerPage.html';
+          } else if (role === 'مدير عام') {
+            window.location.href = 'GeneralManager.html';
+          } else {
+            alert('صلاحية المستخدم غير معروفة. تواصل مع الإدارة.');
+          }
+        } else {
+          alert(data.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+        }
+      })
+      .catch(err => {
+        console.error('خطأ في الاتصال:', err);
+        alert('تعذر الاتصال بالخادم. تأكد من تشغيل الملف app.py.');
+      });
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', login);
+  </script>
+
+</body>
+</html>
