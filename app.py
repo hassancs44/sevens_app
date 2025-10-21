@@ -448,6 +448,9 @@ def chatbot():
     if not user_input:
         return jsonify({"reply": "الرسالة فارغة!"})
 
+    print("🔑 OPENROUTER_API_KEY =", OPENROUTER_API_KEY)
+
+
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
@@ -494,5 +497,6 @@ if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
