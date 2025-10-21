@@ -25,7 +25,9 @@ EXPORT_DIR = os.path.join(BASE_DIR, "exports")
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
 ## مفتاح واجهة OpenRouter API  (احصل عليه من https://openrouter.ai)
-OPENROUTER_API_KEY = "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"
+import os
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
 
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -492,4 +494,5 @@ if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
