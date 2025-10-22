@@ -254,6 +254,22 @@
 </div>
 
 <script>
+
+  <script>
+function normalizeArabicJS(t){
+  t = (t || '').toString().trim();
+  // توحيد الألف والهمزات
+  t = t.replace(/[إأآا]/g, 'ا');
+  // إزالة المسافات المكررة وكل الفراغات
+  t = t.replace(/\s+/g, '');
+  // توحيد ة/ه
+  t = t.replace(/ة/g, 'ه');
+  // إزالة محارف RTL الخفية إن وجدت
+  t = t.replace(/\u200f|\u200e/g, '');
+  return t;
+}
+
+
 let currentUser = null;
 
 /* ========== إقلاع الصفحة ========== */
@@ -285,10 +301,16 @@ async function loadRequests() {
     body: JSON.stringify({role: currentUser.role, department: currentUser.department})
   });
   const data = await res.json();
-  const incoming = data.filter(r => (r['القسم المستلم']||'') === currentUser.department);
-  const outgoing = data.filter(r => (r['القسم المرسل']||'') === currentUser.department);
-  renderRequests('incoming-requests', incoming);
-  renderRequests('outgoing-requests', outgoing);
+  const deptStd = normalizeArabicJS(currentUser.department);
+
+const incoming = data.filter(r =>
+  normalizeArabicJS(r['القسم المستلم']) === deptStd
+);
+
+const outgoing = data.filter(r =>
+  normalizeArabicJS(r['القسم المرسل']) === deptStd
+);
+
 }
 
 function renderRequests(containerId, list) {
