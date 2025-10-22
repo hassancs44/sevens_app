@@ -124,25 +124,50 @@
         </div>
         <div class="form-group">
           <label>القسم المستلم</label>
-         <select id="targetDept" class="form-control" required>
-          <option value="">اختر القسم</option>
-          <option value="الإدارة العامة">الإدارة العامة</option>
-          <option value="الإدارة الإدارية">الإدارة الإدارية</option>
-          <option value="الإدارة المالية">الإدارة المالية</option>
-          <option value="إدارة المراجعة">إدارة المراجعة</option>
-          <option value="إدارة تحليل البيانات">إدارة تحليل البيانات</option>
-          <option value="إدارة الموارد البشرية">إدارة الموارد البشرية</option>
-          <option value="ادارة  التقنية والشبكات">ادارة  التقنية والشبكات</option>
-          <option value="إدارة التسويق">إدارة التسويق</option>
-          <option value="إدارة التشغيل">إدارة التشغيل</option>
-          <option value="إدارة مكتب التأجير">إدارة مكتب التأجير</option>
-          <option value="إدارة الصيانة وقطع الغيار">إدارة الصيانة وقطع الغيار</option>
-          <option value="إدارة المبيعات">إدارة المبيعات</option>
-          <option value="إدارة المخزون - مستودع السيارات">إدارة المخزون - مستودع السيارات</option>
-          <option value="قسم المشتريات">قسم المشتريات</option>
-          <option value="إدارة فرع جدة">إدارة فرع جدة</option>
-          <!-- أضف بقية الفروع كما ترغب -->
-        </select>
+          <select id="targetDept" class="form-control" required>
+  <option value="">اختر القسم</option>
+
+  <!-- الإدارات العامة -->
+  <option value="الإدارة العامة">الإدارة العامة</option>
+  <option value="الإدارة الإدارية">الإدارة الإدارية</option>
+  <option value="الإدارة المالية">الإدارة المالية</option>
+  <option value="إدارة المراجعة">إدارة المراجعة</option>
+  <option value="إدارة تحليل البيانات">إدارة تحليل البيانات</option>
+  <option value="إدارة الموارد البشرية">إدارة الموارد البشرية</option>
+  <option value="إدارة التقنية والشبكات">إدارة التقنية والشبكات</option>
+  <option value="إدارة التسويق">إدارة التسويق</option>
+  <option value="إدارة التشغيل">إدارة التشغيل</option>
+  <option value="إدارة مكتب التأجير">إدارة مكتب التأجير</option>
+  <option value="إدارة الصيانة وقطع الغيار">إدارة الصيانة وقطع الغيار</option>
+  <option value="إدارة المبيعات">إدارة المبيعات</option>
+  <option value="إدارة المخزون - مستودع السيارات">إدارة المخزون - مستودع السيارات</option>
+  <option value="قسم المشتريات">قسم المشتريات</option>
+
+  <!-- الأقسام الفرعية -->
+  <option value="قسم المبيعات الهاتفية">قسم المبيعات الهاتفية</option>
+  <option value="قسم مبيعات الصالة المدينة المنورة">قسم مبيعات الصالة المدينة المنورة</option>
+  <option value="قسم مبيعات الصالة الرياض 1">قسم مبيعات الصالة الرياض 1</option>
+  <option value="قسم مبيعات الصالة الرياض 2">قسم مبيعات الصالة الرياض 2</option>
+  <option value="قسم مبيعات الصالة - جدة">قسم مبيعات الصالة - جدة</option>
+
+  <!-- أقسام النظافة والاستقبال -->
+  <option value="قسم النظافة والاستقبال المدينة">قسم النظافة والاستقبال المدينة</option>
+  <option value="قسم النظافة والاستقبال الرياض 1">قسم النظافة والاستقبال الرياض 1</option>
+  <option value="قسم النظافة والاستقبال الرياض 2">قسم النظافة والاستقبال الرياض 2</option>
+  <option value="قسم النظافة والاستقبال جدة">قسم النظافة والاستقبال جدة</option>
+
+  <!-- أقسام الصيانة والخدمة -->
+  <option value="قسم استقبال عملاء الصيانة">قسم استقبال عملاء الصيانة</option>
+  <option value="قسم خدمة عملاء الصيانة">قسم خدمة عملاء الصيانة</option>
+  <option value="قسم الخدمات - فني صيانة">قسم الخدمات - فني صيانة</option>
+
+  <!-- المخزون -->
+  <option value="قسم مخزون السيارات">قسم مخزون السيارات</option>
+
+  <!-- الفروع -->
+  <option value="إدارة فرع جدة">إدارة فرع جدة</option>
+</select>
+
         </div>
         <button type="submit" class="submit-btn">إرسال الطلب</button>
       </form>
@@ -392,4 +417,3 @@ chatSend.addEventListener("click", sendChat);
 </script>
 </body>
 </html>
-
