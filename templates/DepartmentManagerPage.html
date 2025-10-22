@@ -257,16 +257,15 @@
 
 function normalizeArabicJS(t){
   t = (t || '').toString().trim();
-  // توحيد الألف والهمزات
   t = t.replace(/[إأآا]/g, 'ا');
-  // إزالة المسافات المكررة وكل الفراغات
   t = t.replace(/\s+/g, '');
-  // توحيد ة/ه
   t = t.replace(/ة/g, 'ه');
-  // إزالة محارف RTL الخفية إن وجدت
   t = t.replace(/\u200f|\u200e/g, '');
+  // ✅ إضافة تحويل كلمة "ادارة" إلى "إدارة" مثل الباك-إند
+  t = t.replace(/^اداره?/g, 'اداره');
   return t;
 }
+
 
 
 let currentUser = null;
