@@ -124,51 +124,25 @@
         </div>
         <div class="form-group">
           <label>القسم المستلم</label>
-          <select id="targetDept" class="form-control" required>
-            <option value="">اختر القسم</option>
-            <optgroup label="الإدارات الرئيسية">
-              <option>الإدارة العامة</option>
-              <option>الإدارة الإدارية</option>
-              <option>الإدارة المالية</option>
-              <option>إدارة المراجعة</option>
-              <option>إدارة تحليل البيانات</option>
-              <option>إدارة الموارد البشرية</option>
-              <option>إدارة تقنية المعلومات</option>
-              <option>إدارة التسويق</option>
-              <option>إدارة التشغيل</option>
-              <option>إدارة مكتب التأجير</option>
-              <option>إدارة الصيانة وقطع الغيار</option>
-              <option>إدارة المبيعات</option>
-              <option>إدارة المخزون - مستودع السيارات</option>
-            </optgroup>
-            <optgroup label="فروع المدينة">
-              <option>إدارة المبيعات الهاتفية - المدينة</option>
-              <option>قسم المبيعات الهاتفية</option>
-              <option>مبيعات الصالة - المدينة</option>
-              <option>قسم مبيعات الصالة المدينة المنورة</option>
-              <option>قسم النظافة والاستقبال المدينة</option>
-              <option>قسم الخدمات</option>
-              <option>قسم الاستقبال والنظافة</option>
-              <option>قسم المشتريات</option>
-              <option>قسم الخدمات - فني صيانة</option>
-            </optgroup>
-            <optgroup label="فروع الرياض">
-              <option>إدارة فرع الرياض 1</option>
-              <option>قسم مبيعات الصالة الرياض 1</option>
-              <option>قسم النظافة والاستقبال الرياض 1</option>
-              <option>إدارة فرع الرياض 2</option>
-              <option>قسم مبيعات الصالة الرياض 2</option>
-              <option>قسم النظافة والاستقبال الرياض 2</option>
-              <option>إدارة المبيعات الهاتفية - الرياض</option>
-              <option>قسم المبيعات الهاتفية الرياض</option>
-              <option>قسم النظافة والاستقبال الرياض</option>
-            </optgroup>
-            <optgroup label="فرع جدة">
-              <option>إدارة فرع جدة</option>
-              <option>قسم مبيعات الصالة - جدة</option>
-              <option>قسم النظافة والاستقبال جدة</option>
-            </optgroup>
-          </select>
+         <select id="targetDept" class="form-control" required>
+          <option value="">اختر القسم</option>
+          <option value="الإدارة العامة">الإدارة العامة</option>
+          <option value="الإدارة الإدارية">الإدارة الإدارية</option>
+          <option value="الإدارة المالية">الإدارة المالية</option>
+          <option value="إدارة المراجعة">إدارة المراجعة</option>
+          <option value="إدارة تحليل البيانات">إدارة تحليل البيانات</option>
+          <option value="إدارة الموارد البشرية">إدارة الموارد البشرية</option>
+          <option value="ادارة  التقنية والشبكات">ادارة  التقنية والشبكات</option>
+          <option value="إدارة التسويق">إدارة التسويق</option>
+          <option value="إدارة التشغيل">إدارة التشغيل</option>
+          <option value="إدارة مكتب التأجير">إدارة مكتب التأجير</option>
+          <option value="إدارة الصيانة وقطع الغيار">إدارة الصيانة وقطع الغيار</option>
+          <option value="إدارة المبيعات">إدارة المبيعات</option>
+          <option value="إدارة المخزون - مستودع السيارات">إدارة المخزون - مستودع السيارات</option>
+          <option value="قسم المشتريات">قسم المشتريات</option>
+          <option value="إدارة فرع جدة">إدارة فرع جدة</option>
+          <!-- أضف بقية الفروع كما ترغب -->
+        </select>
         </div>
         <button type="submit" class="submit-btn">إرسال الطلب</button>
       </form>
@@ -418,3 +392,4 @@ chatSend.addEventListener("click", sendChat);
 </script>
 </body>
 </html>
+
