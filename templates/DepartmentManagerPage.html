@@ -301,17 +301,22 @@ async function loadRequests() {
     body: JSON.stringify({role: currentUser.role, department: currentUser.department})
   });
   const data = await res.json();
+
   const deptStd = normalizeArabicJS(currentUser.department);
 
-const incoming = data.filter(r =>
-  normalizeArabicJS(r['القسم المستلم']) === deptStd
-);
+  const incoming = data.filter(r =>
+    normalizeArabicJS(r['القسم المستلم']) === deptStd
+  );
 
-const outgoing = data.filter(r =>
-  normalizeArabicJS(r['القسم المرسل']) === deptStd
-);
+  const outgoing = data.filter(r =>
+    normalizeArabicJS(r['القسم المرسل']) === deptStd
+  );
 
+  
+  renderRequests('incoming-requests', incoming);
+  renderRequests('outgoing-requests', outgoing);
 }
+
 
 function renderRequests(containerId, list) {
   const c = document.getElementById(containerId);
