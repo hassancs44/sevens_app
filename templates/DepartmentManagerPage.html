@@ -312,11 +312,10 @@ async function loadRequests() {
     normalizeArabicJS(r['القسم المرسل']) === deptStd
   );
 
-  
+
   renderRequests('incoming-requests', incoming);
   renderRequests('outgoing-requests', outgoing);
 }
-
 
 function renderRequests(containerId, list) {
   const c = document.getElementById(containerId);
