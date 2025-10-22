@@ -25,9 +25,7 @@ EXPORT_DIR = os.path.join(BASE_DIR, "exports")
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
 ## مفتاح واجهة OpenRouter API  (احصل عليه من https://openrouter.ai)
-import os
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-
+OPENROUTER_API_KEY = "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"
 
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -253,15 +251,33 @@ def get_requests():
         df['recv_norm'] = df['القسم المستلم'].apply(normalize_dept)
 
         # الفلترة حسب الدور
+        # ✅ مدير القسم يشاهد فقط الطلبات التي تخص قسمه (مرسلة أو مستلمة)
         if role == 'موظف':
+            # الموظف يشاهد فقط الطلبات الواردة لقسمه
             filtered = df[df['recv_norm'] == dept_std]
+
+
         elif role == 'مدير قسم':
+
+            # مدير القسم يشاهد الطلبات سواء كانت باسمه الأصلي أو بعد التطبيع
+
             filtered = df[
+
                 (df['recv_norm'] == dept_std) |
-                (df['sent_norm'] == dept_std)
-            ]
+
+                (df['sent_norm'] == dept_std) |
+
+                (df['القسم المستلم'].str.contains(dept, case=False, na=False)) |
+
+                (df['القسم المرسل'].str.contains(dept, case=False, na=False))
+
+                ]
+
+
         elif role == 'مدير عام':
+            # المدير العام يشاهد كل الطلبات بالنظام
             filtered = df
+
         else:
             filtered = df.iloc[0:0]
 
@@ -448,13 +464,6 @@ def chatbot():
     if not user_input:
         return jsonify({"reply": "الرسالة فارغة!"})
 
-    # 👇 جرب نطبع المفتاح للتأكد أنه مقروء من البيئة
-    print("🔑 OPENROUTER_API_KEY =", OPENROUTER_API_KEY)
-
-    if not OPENROUTER_API_KEY:
-        print("🚫 المفتاح غير موجود أو غير مقروء من البيئة!")
-        return jsonify({"reply": "⚠️ لم يتم العثور على مفتاح API في الخادم."})
-
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
@@ -475,22 +484,25 @@ def chatbot():
             "https://openrouter.ai/api/v1/chat/completions",
             headers=headers,
             json=payload,
-            timeout=15,
+            timeout=15,   # ⏱️ أقصى مهلة للرد 15 ثانية فقط
         )
-
-        print("📡 Status Code:", response.status_code)
-        print("📩 Response:", response.text[:500])  # نطبع أول 500 حرف من الرد
 
         if response.status_code == 200:
             data = response.json()
-            reply = data.get("choices", [{}])[0].get("message", {}).get("content", "لم يتم تلقي رد.")
-            return jsonify({"reply": reply})
+            if "choices" in data and len(data["choices"]) > 0:
+                reply = data["choices"][0]["message"]["content"].strip()
+                return jsonify({"reply": reply})
+            else:
+                return jsonify({"reply": "لم يصل رد من نموذج الذكاء الاصطناعي."})
         else:
-            return jsonify({"reply": f"حدث خطأ أثناء الاتصال بالذكاء الاصطناعي: {response.text}"}), 500
+            print("❌ OpenRouter Error:", response.text)
+            return jsonify({"reply": "حدث خطأ في الخادم أثناء معالجة الطلب."})
 
+    except requests.Timeout:
+        return jsonify({"reply": "الخادم تأخر في الرد، حاول مرة أخرى لاحقاً."})
     except Exception as e:
-        print("🔥 chatbot error:", e)
-        return jsonify({"reply": f"خطأ داخلي في الخادم: {e}"}), 500
+        print("❌ chatbot error:", e)
+        return jsonify({"reply": "تعذر الاتصال بخدمة الذكاء الاصطناعي."})
 
 
 # ============== التشغيل ==============
@@ -498,7 +510,4 @@ if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
-
-
 
