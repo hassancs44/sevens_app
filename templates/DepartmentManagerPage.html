@@ -296,25 +296,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ========== تحميل وعرض الطلبات ========== */
 async function loadRequests() {
   const res = await fetch('/api/get_requests', {
-    method: 'POST', headers:{'Content-Type':'application/json'},
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
     body: JSON.stringify({role: currentUser.role, department: currentUser.department})
   });
   const data = await res.json();
 
+  // 🔹 توحيد اسم القسم
   const deptStd = normalizeArabicJS(currentUser.department);
 
-  const incoming = data.filter(r =>
+  // ✅ فلترة الطلبات الخاصة فقط بالقسم (المرسلة أو المستلمة)
+  const related = data.filter(r =>
+    normalizeArabicJS(r['القسم المرسل']) === deptStd ||
     normalizeArabicJS(r['القسم المستلم']) === deptStd
   );
 
-  const outgoing = data.filter(r =>
-    normalizeArabicJS(r['القسم المرسل']) === deptStd
-  );
-
+  // 🔸 تقسيمها إلى مرسلة ومستلمة فقط للعرض
+  const incoming = related.filter(r => normalizeArabicJS(r['القسم المستلم']) === deptStd);
+  const outgoing = related.filter(r => normalizeArabicJS(r['القسم المرسل']) === deptStd);
 
   renderRequests('incoming-requests', incoming);
   renderRequests('outgoing-requests', outgoing);
 }
+
 
 function renderRequests(containerId, list) {
   const c = document.getElementById(containerId);
