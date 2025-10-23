@@ -151,6 +151,7 @@ def login():
     elif role in ['موظف','موظفه','عامل']:             role='موظف'
     elif role in ['مدير عام','الإدارة العامة']:        role='مدير عام'
 
+    # 🔹 إضافة حفظ الاسم والقسم في الرد النهائي
     return jsonify({"success": True,"user":{
         "email": str(user.get('البريد الإلكتروني','')).strip(),
         "name": str(user.get('الاسم','')).strip(),
@@ -158,8 +159,10 @@ def login():
         "department": str(user.get('القسم','')).strip()
     }})
 
+
 # ============== API: الطلبات ==============
 
+# ============== API: الطلبات ==============
 @app.route('/api/get_requests', methods=['POST'])
 def get_requests():
     try:
@@ -234,7 +237,6 @@ def get_requests():
             n = n.replace('\u200f', '').replace('\u200e', '').replace('  ', ' ')
             if n in dept_aliases:
                 return dept_aliases[n]
-            # fallback normalization (ignore "ادارة"/"إدارة" differences)
             if 'التقنية' in n or 'الشبكات' in n or 'المعلومات' in n:
                 return "إدارة تقنية المعلومات"
             if 'الصيانة' in n:
@@ -251,44 +253,29 @@ def get_requests():
         df['recv_norm'] = df['القسم المستلم'].apply(normalize_dept)
 
         # الفلترة حسب الدور
-        # ✅ مدير القسم يشاهد فقط الطلبات التي تخص قسمه (مرسلة أو مستلمة)
         if role == 'موظف':
-            # الموظف يشاهد فقط الطلبات الواردة لقسمه
-            filtered = df[df['recv_norm'] == dept_std]
-
-
+            filtered = df[(df['recv_norm'] == dept_std) | (df['sent_norm'] == dept_std)]
         elif role == 'مدير قسم':
-
-            # مدير القسم يشاهد الطلبات سواء كانت باسمه الأصلي أو بعد التطبيع
-
             filtered = df[
-
                 (df['recv_norm'] == dept_std) |
-
                 (df['sent_norm'] == dept_std) |
-
                 (df['القسم المستلم'].str.contains(dept, case=False, na=False)) |
-
                 (df['القسم المرسل'].str.contains(dept, case=False, na=False))
-
-                ]
-
-
+            ]
         elif role == 'مدير عام':
-            # المدير العام يشاهد كل الطلبات بالنظام
             filtered = df
-
         else:
             filtered = df.iloc[0:0]
 
-        # استبعاد الطلبات المغلقة والمرفوضة
-        if 'الحالة' in filtered.columns:
+        # 🔹 لا نحذف المغلق والمرفوض من المدير العام، فقط من الموظف
+        if role != 'مدير عام' and 'الحالة' in filtered.columns:
             filtered = filtered[~filtered['الحالة'].isin(['مغلق', 'مرفوض'])]
 
         return jsonify(filtered.fillna('').to_dict(orient='records'))
     except Exception as e:
         print("get_requests error:", e)
         return jsonify([])
+
 
 @app.route('/api/create_request', methods=['POST'])
 def create_request():
@@ -305,17 +292,28 @@ def create_request():
 
         df = load_requests()
         for col in ['رقم الطلب','التاريخ','العنوان','الوصف','القسم المرسل','القسم المستلم',
-                    'الحالة','الموظف المعين','آخر تحديث بواسطة','الوقت']:
-            if col not in df.columns: df[col] = ""
+                    'الحالة','الموظف المعين','آخر تحديث بواسطة','الوقت','بدأ التنفيذ بواسطة','أغلق بواسطة']:
+            if col not in df.columns:
+                df[col] = ""
 
+        # 🔹 نضيف "بدأ التنفيذ بواسطة" و"أغلق بواسطة" لسهولة تتبع من قام بالتغييرات
         new_row = {
             'رقم الطلب': generate_request_id(),
             'التاريخ': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'العنوان': title, 'الوصف': desc,
-            'القسم المرسل': sender, 'القسم المستلم': target,
-            'الحالة': 'جديد', 'الموظف المعين': '-',
-            'آخر تحديث بواسطة': sender_name or '-', 'الوقت':''
+            'العنوان': title,
+            'الوصف': desc,
+            'القسم المرسل': sender,
+            'اسم المرسل': sender_name,  # ✅ جديد
+            'القسم المستلم': target,
+            'اسم المستلم': '',  # ✅ سيُملأ لاحقًا عند الرد أو التنفيذ
+            'الحالة': 'جديد',
+            'الموظف المعين': '-',
+            'آخر تحديث بواسطة': sender_name or '-',
+            'بدأ التنفيذ بواسطة': '',
+            'أغلق بواسطة': '',
+            'الوقت': ''
         }
+
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
         save_requests(df)
         return jsonify({"success": True})
@@ -329,24 +327,38 @@ def update_request_status():
     req_id = (data.get('requestId','') or '').strip()
     new_status = (data.get('status','') or '').strip()
     updater = (data.get('updater','') or '').strip()
+    duration = data.get('duration')
 
     df = load_requests()
     if df.empty or 'رقم الطلب' not in df.columns:
         return jsonify({"success": False}), 404
 
     idx_list = df.index[df['رقم الطلب'] == req_id].tolist()
-    if not idx_list: return jsonify({"success": False}), 404
+    if not idx_list:
+        return jsonify({"success": False}), 404
 
     idx = idx_list[0]
+
+    # 🔹 تحديث الحالة العامة واسم آخر من غيّرها
     if 'الحالة' in df.columns: df.at[idx, 'الحالة'] = new_status
     if 'آخر تحديث بواسطة' in df.columns: df.at[idx, 'آخر تحديث بواسطة'] = updater
-    duration = data.get('duration')
+
+    # 🔹 تسجيل من بدأ التنفيذ أو أغلق الطلب
+    if new_status == 'جاري التنفيذ':
+        df.at[idx, 'بدأ التنفيذ بواسطة'] = updater
+    if 'اسم المستلم' in df.columns:
+        df.at[idx, 'اسم المستلم'] = updater  # ✅ يحفظ اسم المستلم
+    elif new_status == 'مغلق':
+        df.at[idx, 'أغلق بواسطة'] = updater
+
     if duration:
-        if 'الوقت' not in df.columns: df['الوقت'] = ''
+        if 'الوقت' not in df.columns:
+            df['الوقت'] = ''
         df.at[idx, 'الوقت'] = duration
 
     save_requests(df)
     return jsonify({"success": True})
+
 
 # ============== API: تصدير الطلبات ==============
 @app.route('/api/export_requests', methods=['POST'])
@@ -503,6 +515,37 @@ def chatbot():
     except Exception as e:
         print("❌ chatbot error:", e)
         return jsonify({"reply": "تعذر الاتصال بخدمة الذكاء الاصطناعي."})
+
+# ============== API: دردشة بين الموظفين ==============
+CHAT_PATH = os.path.join(BASE_DIR, "chats.xlsx")
+
+def load_chats():
+    if not os.path.exists(CHAT_PATH):
+        pd.DataFrame(columns=['رقم الطلب','المرسل','القسم','الرسالة','الوقت']).to_excel(CHAT_PATH,index=False)
+    return pd.read_excel(CHAT_PATH)
+
+@app.route('/api/chat_send', methods=['POST'])
+def chat_send():
+    data = request.get_json()
+    req_id = data.get('request_id')
+    sender = data.get('sender')
+    dept = data.get('department')
+    msg = data.get('message')
+    if not all([req_id, sender, msg]): return jsonify({"success": False})
+    df = load_chats()
+    new = pd.DataFrame([{
+        'رقم الطلب': req_id, 'المرسل': sender, 'القسم': dept,
+        'الرسالة': msg, 'الوقت': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }])
+    df = pd.concat([df, new], ignore_index=True)
+    df.to_excel(CHAT_PATH,index=False)
+    return jsonify({"success": True})
+
+@app.route('/api/chat_get/<req_id>')
+def chat_get(req_id):
+    df = load_chats()
+    msgs = df[df['رقم الطلب']==req_id].to_dict(orient='records')
+    return jsonify(msgs)
 
 
 # ============== التشغيل ==============
