@@ -285,10 +285,11 @@ async function loadRequestsForUser(dept){
               </div>
               <h3 class="request-title">${r['العنوان']}</h3>
               <p class="request-desc">${r['الوصف']}</p>
-<div class="request-meta">
+              <div class="request-meta">
   <div class="meta-item"><i class="fas fa-user"></i> المرسل: ${r['اسم المرسل']||'-'} (${r['القسم المرسل']||''})</div>
   <div class="meta-item"><i class="fas fa-user-check"></i> المستلم: ${r['اسم المستلم']||'-'} (${r['القسم المستلم']||''})</div>
 </div>
+
 
               <div class="status-info">
                 <div><span class="status-label">الحالة:</span>
@@ -437,3 +438,4 @@ function startLiveTimer(id){
 
 </body>
 </html>
+
