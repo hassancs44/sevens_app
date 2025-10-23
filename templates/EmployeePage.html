@@ -101,6 +101,16 @@
 
   <div class="container">
     <div class="page-header">
+      <select id="statusFilter" class="form-control" style="width:200px" onchange="filterRequestsByStatus()">
+  <option value="">جميع الحالات</option>
+  <option value="جديد">جديد</option>
+  <option value="قيد المراجعة">قيد المراجعة</option>
+  <option value="جاري التنفيذ">جاري التنفيذ</option>
+  <option value="معلق">معلق</option>
+  <option value="مغلق">مغلق</option>
+  <option value="مرفوض">مرفوض</option>
+</select>
+
       <h2 class="page-title" id="pageTitle">طلبات الأقسام الأخرى</h2>
       <button class="new-request-btn" onclick="openNewRequestModal()"><i class="fas fa-plus"></i> رفع طلب جديد</button>
     </div>
@@ -127,46 +137,62 @@
           <select id="targetDept" class="form-control" required>
   <option value="">اختر القسم</option>
 
-  <!-- الإدارات العامة -->
-  <option value="الإدارة العامة">الإدارة العامة</option>
-  <option value="الإدارة الإدارية">الإدارة الإدارية</option>
-  <option value="الإدارة المالية">الإدارة المالية</option>
-  <option value="إدارة المراجعة">إدارة المراجعة</option>
-  <option value="إدارة تحليل البيانات">إدارة تحليل البيانات</option>
-  <option value="إدارة الموارد البشرية">إدارة الموارد البشرية</option>
-  <option value="إدارة التقنية والشبكات">إدارة التقنية والشبكات</option>
-  <option value="إدارة التسويق">إدارة التسويق</option>
-  <option value="إدارة التشغيل">إدارة التشغيل</option>
-  <option value="إدارة مكتب التأجير">إدارة مكتب التأجير</option>
-  <option value="إدارة الصيانة وقطع الغيار">إدارة الصيانة وقطع الغيار</option>
-  <option value="إدارة المبيعات">إدارة المبيعات</option>
-  <option value="إدارة المخزون - مستودع السيارات">إدارة المخزون - مستودع السيارات</option>
-  <option value="قسم المشتريات">قسم المشتريات</option>
+  <!-- 🏢 الإدارات الرئيسية -->
+  <optgroup label="الإدارات الرئيسية">
+    <option value="الإدارة العامة">الإدارة العامة</option>
+    <option value="الإدارة الإدارية">الإدارة الإدارية</option>
+    <option value="الإدارة المالية">الإدارة المالية</option>
+    <option value="إدارة المراجعة">إدارة المراجعة</option>
+    <option value="إدارة تحليل البيانات">إدارة تحليل البيانات</option>
+    <option value="إدارة الموارد البشرية">إدارة الموارد البشرية</option>
+    <option value="إدارة التقنية والشبكات">إدارة التقنية والشبكات</option>
+    <option value="إدارة التسويق">إدارة التسويق</option>
+    <option value="إدارة التشغيل">إدارة التشغيل</option>
+    <option value="إدارة مكتب التأجير">إدارة مكتب التأجير</option>
+    <option value="إدارة الصيانة وقطع الغيار">إدارة الصيانة وقطع الغيار</option>
+    <option value="إدارة المبيعات">إدارة المبيعات</option>
+    <option value="إدارة المخزون - مستودع السيارات">إدارة المخزون - مستودع السيارات</option>
+    <option value="قسم المشتريات">قسم المشتريات</option>
+  </optgroup>
 
-  <!-- الأقسام الفرعية -->
-  <option value="قسم المبيعات الهاتفية">قسم المبيعات الهاتفية</option>
-  <option value="قسم مبيعات الصالة المدينة المنورة">قسم مبيعات الصالة المدينة المنورة</option>
-  <option value="قسم مبيعات الصالة الرياض 1">قسم مبيعات الصالة الرياض 1</option>
-  <option value="قسم مبيعات الصالة الرياض 2">قسم مبيعات الصالة الرياض 2</option>
-  <option value="قسم مبيعات الصالة - جدة">قسم مبيعات الصالة - جدة</option>
+  <!-- 💼 أقسام المبيعات -->
+  <optgroup label="أقسام المبيعات">
+    <option value="قسم المبيعات الهاتفية">قسم المبيعات الهاتفية</option>
+    <option value="قسم المبيعات الهاتفية الرياض">قسم المبيعات الهاتفية الرياض</option>
+    <option value="قسم مبيعات الصالة المدينة المنورة">قسم مبيعات الصالة المدينة المنورة</option>
+    <option value="قسم مبيعات الصالة الرياض 1">قسم مبيعات الصالة الرياض 1</option>
+    <option value="قسم مبيعات الصالة الرياض 2">قسم مبيعات الصالة الرياض 2</option>
+    <option value="قسم مبيعات الصالة - جدة">قسم مبيعات الصالة - جدة</option>
+  </optgroup>
 
-  <!-- أقسام النظافة والاستقبال -->
-  <option value="قسم النظافة والاستقبال المدينة">قسم النظافة والاستقبال المدينة</option>
-  <option value="قسم النظافة والاستقبال الرياض 1">قسم النظافة والاستقبال الرياض 1</option>
-  <option value="قسم النظافة والاستقبال الرياض 2">قسم النظافة والاستقبال الرياض 2</option>
-  <option value="قسم النظافة والاستقبال جدة">قسم النظافة والاستقبال جدة</option>
+  <!-- 🔧 أقسام الصيانة والخدمات -->
+  <optgroup label="أقسام الصيانة والخدمات">
+    <option value="قسم استقبال عملاء الصيانة">قسم استقبال عملاء الصيانة</option>
+    <option value="قسم خدمة عملاء الصيانة">قسم خدمة عملاء الصيانة</option>
+    <option value="قسم الخدمات - فني صيانة">قسم الخدمات - فني صيانة</option>
+  </optgroup>
 
-  <!-- أقسام الصيانة والخدمة -->
-  <option value="قسم استقبال عملاء الصيانة">قسم استقبال عملاء الصيانة</option>
-  <option value="قسم خدمة عملاء الصيانة">قسم خدمة عملاء الصيانة</option>
-  <option value="قسم الخدمات - فني صيانة">قسم الخدمات - فني صيانة</option>
+  <!-- 🧾 أقسام المخزون والمشتريات -->
+  <optgroup label="أقسام المخزون والمشتريات">
+    <option value="قسم مخزون السيارات">قسم مخزون السيارات</option>
+    <option value="قسم المشتريات">قسم المشتريات</option>
+  </optgroup>
 
-  <!-- المخزون -->
-  <option value="قسم مخزون السيارات">قسم مخزون السيارات</option>
+  <!-- 🧹 أقسام النظافة والاستقبال -->
+  <optgroup label="أقسام النظافة والاستقبال">
+    <option value="قسم النظافة والاستقبال المدينة">قسم النظافة والاستقبال المدينة</option>
+    <option value="قسم النظافة والاستقبال الرياض 1">قسم النظافة والاستقبال الرياض 1</option>
+    <option value="قسم النظافة والاستقبال الرياض 2">قسم النظافة والاستقبال الرياض 2</option>
+    <option value="قسم النظافة والاستقبال جدة">قسم النظافة والاستقبال جدة</option>
+    <option value="قسم الاستقبال والنظافة">قسم الاستقبال والنظافة</option>
+  </optgroup>
 
-  <!-- الفروع -->
-  <option value="إدارة فرع جدة">إدارة فرع جدة</option>
+  <!-- 🏬 الفروع -->
+  <optgroup label="الفروع">
+    <option value="إدارة فرع جدة">إدارة فرع جدة</option>
+  </optgroup>
 </select>
+
 
         </div>
         <button type="submit" class="submit-btn">إرسال الطلب</button>
@@ -188,8 +214,7 @@
     <textarea id="cbInput" placeholder="اكتب رسالتك... (Enter للإرسال، Shift+Enter لسطر جديد)"></textarea>
     <button id="cbSend" class="cb-send" onclick="sendChat()">إرسال</button>
   </div>
-</div>
-
+  </div>
 <script>
 let currentUser=null;
 let activeTimers={};
@@ -232,42 +257,102 @@ async function loadRequestsForUser(dept){
       body:JSON.stringify({role:'موظف',department:dept})
     });
     const data=await res.json();
+
     if(!Array.isArray(data) || !data.length){
-      c.innerHTML='<div class="loading-message">لا توجد طلبات حالياً.</div>';return;
+      c.innerHTML='<div class="loading-message">لا توجد طلبات حالياً.</div>';
+      return;
     }
-    c.innerHTML=data.map(r=>`
-      <div class="request-card">
-        <div class="status-header status-${(r['الحالة']||'').replace(/\s+/g,'-')}"></div>
-        <div class="card-content">
-          <div class="card-top">
-            <div class="request-id">#${r['رقم الطلب']||''}</div>
-            <div class="request-date">${r['التاريخ']||''}</div>
+
+    const received = data.filter(r => r['القسم المستلم'] === dept);
+    const sent = data.filter(r => r['القسم المرسل'] === dept);
+    let html = "";
+
+    /* ==================== الطلبات الواردة ==================== */
+    if (received.length) {
+      html += `<h3 class="page-title" style="margin-top:20px">الطلبات الواردة إلى قسمك</h3>`;
+      html += received.map(r => {
+        const id = r['رقم الطلب'];
+        const status = r['الحالة'] || '';
+        const startKey = `startTime_${id}`;
+        const isRunning = status === "جاري التنفيذ" && localStorage.getItem(startKey);
+        return `
+          <div class="request-card ${status === 'جاري التنفيذ' ? 'card-glow' : ''}">
+            <div class="status-header status-${status.replace(/\s+/g,'-')}"></div>
+            <div class="card-content">
+              <div class="card-top">
+                <div class="request-id">#${id}</div>
+                <div class="request-date">${r['التاريخ']}</div>
+              </div>
+              <h3 class="request-title">${r['العنوان']}</h3>
+              <p class="request-desc">${r['الوصف']}</p>
+<div class="request-meta">
+  <div class="meta-item"><i class="fas fa-user"></i> المرسل: ${req['اسم المرسل']||'-'} (${req['القسم المرسل']||''})</div>
+  <div class="meta-item"><i class="fas fa-user-check"></i> المستلم: ${req['اسم المستلم']||'-'} (${req['القسم المستلم']||''})</div>
+</div>
+
+              <div class="status-info">
+                <div><span class="status-label">الحالة:</span>
+                  <select id="status-${id}" class="status-select" onchange="saveStatus('${id}')">
+                    <option ${status==='جديد'?'selected':''}>جديد</option>
+                    <option ${status==='قيد المراجعة'?'selected':''}>قيد المراجعة</option>
+                    <option ${status==='جاري التنفيذ'?'selected':''}>جاري التنفيذ</option>
+                    <option ${status==='معلق'?'selected':''}>معلق</option>
+                    <option ${status==='مغلق'?'selected':''}>مغلق</option>
+                    <option ${status==='مرفوض'?'selected':''}>مرفوض</option>
+                  </select>
+                </div>
+                <div><span class="status-label">القسم المرسل:</span> ${r['القسم المرسل'] || '-'}</div>
+                <div><span class="status-label">آخر تحديث بواسطة:</span> ${r['آخر تحديث بواسطة'] || '-'}</div>
+                <div><span class="status-label">بدأ التنفيذ بواسطة:</span> ${r['بدأ التنفيذ بواسطة'] || '-'}</div>
+                <div><span class="status-label">أغلق بواسطة:</span> ${r['أغلق بواسطة'] || '-'}</div>
+
+                ${status === 'جاري التنفيذ'
+                  ? `<div><span class="status-label">الوقت المنقضي:</span> <span id="timer-${id}" class="timer-text">جارٍ الحساب...</span></div>`
+                  : ''}
+              </div>
+            </div>
           </div>
-          <h3 class="request-title">${r['العنوان']||''}</h3>
-          <p class="request-desc">${r['الوصف']||''}</p>
-          <div class="status-info">
-            <div><span class="status-label">الحالة:</span> ${r['الحالة']||''}</div>
-            ${r['الحالة']==='جاري التنفيذ'
-              ?`<div><span class="status-label">الوقت:</span> <span id="timer-${r['رقم الطلب']}" class="timer-text">00:00:00</span></div>`
-              :''}
-          </div>
-          <div class="update-section">
-            <select class="status-select" id="status-${r['رقم الطلب']}">
-              ${['جديد','قيد المراجعة','جاري التنفيذ','معلق','مغلق','مرفوض'].map(s=>`<option ${s===(r['الحالة']||'')?'selected':''}>${s}</option>`).join('')}
-            </select>
-            <button class="save-btn" onclick="saveStatus('${r['رقم الطلب']}')">حفظ الحالة</button>
+        `;
+      }).join('');
+    }
+
+    /* ==================== الطلبات المرسلة ==================== */
+    if (sent.length) {
+      html += `<h3 class="page-title" style="margin-top:30px">الطلبات التي أرسلتها</h3>`;
+      html += sent.map(r => `
+        <div class="request-card">
+          <div class="status-header status-${(r['الحالة']||'').replace(/\s+/g,'-')}"></div>
+          <div class="card-content">
+            <div class="card-top">
+              <div class="request-id">#${r['رقم الطلب']}</div>
+              <div class="request-date">${r['التاريخ']}</div>
+            </div>
+            <h3 class="request-title">${r['العنوان']}</h3>
+            <p class="request-desc">${r['الوصف']}</p>
+            <div class="status-info">
+              <div><span class="status-label">الحالة:</span> ${r['الحالة']}</div>
+              <div><span class="status-label">القسم المستلم:</span> ${r['القسم المستلم'] || '-'}</div>
+              <div><span class="status-label">آخر تحديث بواسطة:</span> ${r['آخر تحديث بواسطة'] || '-'}</div>
+              <div><span class="status-label">بدأ التنفيذ بواسطة:</span> ${r['بدأ التنفيذ بواسطة'] || '-'}</div>
+              <div><span class="status-label">أغلق بواسطة:</span> ${r['أغلق بواسطة'] || '-'}</div>
+            </div>
           </div>
         </div>
-      </div>`).join('');
+      `).join('');
+    }
 
-    data.forEach(r=>{
-      if(r['الحالة']==='جاري التنفيذ' && localStorage.getItem(`startTime_${r['رقم الطلب']}`)){
+    c.innerHTML = html || '<div class="loading-message">لا توجد طلبات حالياً.</div>';
+
+    // 🔹 تفعيل العدادات الجارية
+    received.forEach(r=>{
+      if(r['الحالة']==='جاري التنفيذ'){
         startLiveTimer(r['رقم الطلب']);
       }
     });
+
   }catch(e){
     console.error(e);
-    c.innerHTML='<div class="error-message">فشل تحميل الطلبات</div>';
+    c.innerHTML='<div class="loading-message">حدث خطأ أثناء تحميل الطلبات.</div>';
   }
 }
 
@@ -297,123 +382,58 @@ async function saveStatus(id){
     body:JSON.stringify({requestId:id,status:s,updater:currentUser.name,duration})
   });
   const d=await res.json();
-  if(d && d.success){ alert("تم التحديث بنجاح ✅"); loadRequestsForUser(currentUser.department); }
+  if(d && d.success){
+    alert("تم التحديث بنجاح ✅");
+    loadRequestsForUser(currentUser.department);
+  }
 }
 
+/* ========= العداد الحي ========= */
 function startLiveTimer(id){
   const startKey=`startTime_${id}`;
-  const el=document.getElementById(`timer-${id}`); if(!el) return;
+  const el=document.getElementById(`timer-${id}`);
+  if(!el) return;
   function update(){
-    const start=localStorage.getItem(startKey); if(!start) return;
+    const start=localStorage.getItem(startKey);
+    if(!start) return;
     const diff=Date.now()-new Date(start).getTime();
-    const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+    const h=Math.floor(diff/3600000),
+          m=Math.floor((diff%3600000)/60000),
+          s=Math.floor((diff%60000)/1000);
     el.textContent=`${h} ساعة و ${m} دقيقة و ${s} ثانية`;
   }
   update();
   if(activeTimers[id]) clearInterval(activeTimers[id]);
   activeTimers[id]=setInterval(update,1000);
 }
-
-/* ========= إنشاء طلب جديد ========= */
-document.getElementById('newRequestForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  const t=document.getElementById('requestTitle').value.trim();
-  const d=document.getElementById('requestDesc').value.trim();
-  const dept=document.getElementById('targetDept').value;
-  if(!t||!d||!dept){ alert("يرجى ملء جميع الحقول"); return; }
-
-  const res=await fetch('/api/create_request',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      title:t,description:d,targetDept:dept,
-      senderDept:currentUser.department,senderName:currentUser.name
-    })
-  });
-  const x=await res.json();
-  if(x && x.success){
-    alert("تم رفع الطلب بنجاح ✅");
-    closeNewRequestModal();
-    loadRequestsForUser(currentUser.department);
-    e.target.reset();
-  }
-});
-
-function openNewRequestModal(){document.getElementById('newRequestModal').style.display='flex';}
-function closeNewRequestModal(){document.getElementById('newRequestModal').style.display='none';}
-function logout(){if(confirm("تأكيد تسجيل الخروج؟")){localStorage.removeItem('currentUser');location.href='Login.html';}}
-
-// ===================== 🔹 نظام الشات بوت الجديد =====================
-const chatWidget = document.getElementById("chatbotWidget");
-const chatBody = document.getElementById("cbBody");
-const chatInput = document.getElementById("cbInput");
-const chatSend = document.getElementById("cbSend");
-
-function toggleChat(forceState) {
-  if (typeof forceState === "boolean") {
-    chatWidget.classList.toggle("hidden", !forceState);
-  } else {
-    chatWidget.classList.toggle("hidden");
-  }
-  if (!chatWidget.classList.contains("hidden")) chatInput.focus();
-}
-
-async function sendChat() {
-  const msg = chatInput.value.trim();
-  if (!msg) return;
-
-  appendMessage(msg, "user");
-  chatInput.value = "";
-  chatInput.style.height = "auto";
-
-  appendTyping();
-  try {
-    const res = await fetch("/chatbot", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg }),
-    });
-    const data = await res.json();
-    removeTyping();
-    appendMessage(data.reply || "لم أتمكن من الرد حالياً.", "bot");
-  } catch (e) {
-    removeTyping();
-    appendMessage("حدث خطأ أثناء الاتصال بالخادم.", "bot");
-  }
-}
-
-// دوال مساعدة للرسائل
-function appendMessage(text, sender = "bot") {
-  const div = document.createElement("div");
-  div.className = `cb-msg ${sender}`;
-  div.textContent = text;
-  chatBody.appendChild(div);
-  chatBody.scrollTop = chatBody.scrollHeight;
-}
-
-function appendTyping() {
-  const div = document.createElement("div");
-  div.className = "cb-typing";
-  div.id = "typing";
-  div.innerHTML = `<i class="fas fa-robot"></i> <span class="dots">...</span>`;
-  chatBody.appendChild(div);
-  chatBody.scrollTop = chatBody.scrollHeight;
-}
-
-function removeTyping() {
-  const typing = document.getElementById("typing");
-  if (typing) typing.remove();
-}
-
-// إرسال بالزر أو Enter
-chatInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendChat();
-  }
-});
-chatSend.addEventListener("click", sendChat);
-
 </script>
+
+<style>
+/* ✳️ عداد الوقت الأخضر المتحرك */
+.timer-text{
+  font-weight:700;
+  color:#1b5e20;
+  background:linear-gradient(90deg,#a5d6a7,#81c784,#66bb6a);
+  padding:6px 12px;
+  border-radius:10px;
+  display:inline-block;
+  margin-top:6px;
+  animation:pulse 1.5s infinite ease-in-out;
+  box-shadow:0 0 10px rgba(102,187,106,0.4);
+}
+@keyframes pulse{
+  0%{transform:scale(1);box-shadow:0 0 10px rgba(102,187,106,0.4);}
+  50%{transform:scale(1.05);box-shadow:0 0 15px rgba(102,187,106,0.6);}
+  100%{transform:scale(1);box-shadow:0 0 10px rgba(102,187,106,0.4);}
+}
+
+/* ✳️ توهج البطاقة أثناء التنفيذ */
+.card-glow{
+  border:2px solid #81c784 !important;
+  box-shadow:0 0 18px rgba(129,199,132,0.6) !important;
+  transition:all .3s ease-in-out;
+}
+</style>
+
 </body>
 </html>
