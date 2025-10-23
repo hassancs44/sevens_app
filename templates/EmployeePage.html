@@ -114,10 +114,14 @@
       <h2 class="page-title" id="pageTitle">طلبات الأقسام الأخرى</h2>
       <button class="new-request-btn" onclick="openNewRequestModal()"><i class="fas fa-plus"></i> رفع طلب جديد</button>
     </div>
-    <div class="requests-grid" id="requestsContainer">
-      <div class="loading-message">جارٍ تحميل الطلبات...</div>
-    </div>
-  </div>
+    <div class="requests-grid">
+  <h3 class="page-title">الطلبات الواردة إلى قسمك</h3>
+  <div id="incoming-requests"></div>
+
+  <h3 class="page-title" style="margin-top:30px;">الطلبات التي أرسلتها</h3>
+  <div id="outgoing-requests"></div>
+</div>
+
 
 
   <!-- 🔹 نموذج رفع طلب -->
@@ -218,261 +222,203 @@
   </div>
   </div>
 
-<script>
-let currentUser=null;
-let activeTimers={};
+<!-- 🔹 السكربت -->
+  <script>
+/* ========== دالة توحيد النص العربي ========== */
+function normalizeArabicJS(t){
+  t = (t || '').toString().trim();
+  t = t.replace(/[إأآا]/g, 'ا');
+  t = t.replace(/\s+/g, '');
+  t = t.replace(/ة/g, 'ه');
+  t = t.replace(/\u200f|\u200e/g, '');
+  t = t.replace(/^اداره?/g, 'اداره');
+  return t;
+}
 
-/* ========= تحميل بيانات المستخدم و الطلبات ========= */
-document.addEventListener('DOMContentLoaded',()=>{
-  const userData=localStorage.getItem('currentUser');
-  if(!userData){ location.href='Login.html'; return; }
-  currentUser=JSON.parse(userData);
-  if(currentUser.role!=='موظف'){ location.href='Login.html'; return; }
+/* ========== تعريف المستخدم الحالي ========== */
+let currentUser = null;
+let chatHistory = [];
+let activeTimers = {};
 
-  document.getElementById('userWelcome').textContent=`مرحباً، ${currentUser.name} (${currentUser.department})`;
-  document.getElementById('pageTitle').textContent=`طلبات الأقسام الأخرى (قسمك: ${currentUser.department})`;
-  loadRequestsForUser(currentUser.department);
+/* ========== عند تحميل الصفحة ========== */
+document.addEventListener('DOMContentLoaded', async () => {
+  const userData = localStorage.getItem('currentUser');
+  if (!userData) return location.href = 'Login.html';
+  currentUser = JSON.parse(userData);
+  if (currentUser.role !== 'موظف') return location.href = 'Login.html';
 
-  // شات: رسالة ترحيبية عند أول فتح
-  const body=document.getElementById('cbBody');
-  if(body && body.childElementCount===0){
-    appendMsg('bot','مرحباً! أنا مساعد SEVENS. اسألني أي شيء 🎯');
-  }
+  document.getElementById('userWelcome').textContent = `مرحباً، ${currentUser.name} (${currentUser.department})`;
+  document.getElementById('pageTitle').textContent = `لوحة  قسم ${currentUser.department}`;
 
-  // إدخال الشات: Enter للإرسال
-  const ta=document.getElementById('cbInput');
-  ta.addEventListener('keydown', (e)=>{
-    if(e.key==='Enter' && !e.shiftKey){
-      e.preventDefault();
-      sendChat();
-    }
+  const ta = document.getElementById('cbInput');
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
   });
+
+  appendMsg('bot', 'مرحباً! أنا مساعد SEVENS. اسألني أي شيء بخصوص الطلبات أو المهام 🤖');
+  await loadRequests();
+
+  // تحديث تلقائي كل دقيقة
+  setInterval(loadRequests, 60000);
 });
 
-/* ========= تحميل الطلبات ========= */
-async function loadRequestsForUser(dept){
-  const c=document.getElementById('requestsContainer');
-  c.innerHTML='<div class="loading-message">جارٍ تحميل الطلبات...</div>';
-  try{
-    const res=await fetch('/api/get_requests',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({role:'موظف',department:dept})
-    });
-    const data=await res.json();
+/* ========== تحميل الطلبات ========== */
+async function loadRequests() {
+  const res = await fetch('/api/get_requests', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role: currentUser.role, department: currentUser.department })
+  });
+  const data = await res.json();
+  const deptStd = normalizeArabicJS(currentUser.department);
 
-    if(!Array.isArray(data) || !data.length){
-      c.innerHTML='<div class="loading-message">لا توجد طلبات حالياً.</div>';
-      return;
-    }
+  const related = data.filter(r =>
+    normalizeArabicJS(r['القسم المرسل']) === deptStd ||
+    normalizeArabicJS(r['القسم المستلم']) === deptStd
+  );
 
-    const received = data.filter(r => r['القسم المستلم'] === dept);
-    const sent = data.filter(r => r['القسم المرسل'] === dept);
-    let html = "";
+  renderRequests('incoming-requests', related.filter(r => normalizeArabicJS(r['القسم المستلم']) === deptStd));
+  renderRequests('outgoing-requests', related.filter(r => normalizeArabicJS(r['القسم المرسل']) === deptStd));
 
-    /* ==================== الطلبات الواردة ==================== */
-    if (received.length) {
-      html += `<h3 class="page-title" style="margin-top:20px">الطلبات الواردة إلى قسمك</h3>`;
-      html += received.map(r => {
-        const id = r['رقم الطلب'];
-        const status = r['الحالة'] || '';
-        const startKey = `startTime_${id}`;
-        const isRunning = status === "جاري التنفيذ" && localStorage.getItem(startKey);
-        return `
-          <div class="request-card ${status === 'جاري التنفيذ' ? 'card-glow' : ''}">
-            <div class="status-header status-${status.replace(/\s+/g,'-')}"></div>
-            <div class="card-content">
-              <div class="card-top">
-                <div class="request-id">#${id}</div>
-                <div class="request-date">${r['التاريخ']}</div>
-              </div>
-              <h3 class="request-title">${r['العنوان']}</h3>
-              <p class="request-desc">${r['الوصف']}</p>
-              <div class="request-meta">
-  <div class="meta-item"><i class="fas fa-user"></i> المرسل: ${r['اسم المرسل']||'-'} (${r['القسم المرسل']||''})</div>
-  <div class="meta-item"><i class="fas fa-user-check"></i> المستلم: ${r['اسم المستلم']||'-'} (${r['القسم المستلم']||''})</div>
-</div>
+  filterRequestsByStatus(); // للحفاظ على الفلتر بعد التحديث
+}
 
+/* ========== عرض الطلبات ========== */
+function renderRequests(containerId, list) {
+  const c = document.getElementById(containerId);
+  if (!Array.isArray(list) || !list.length) {
+    c.innerHTML = '<div class="no-requests">لا توجد طلبات.</div>';
+    return;
+  }
 
-              <div class="status-info">
-                <div><span class="status-label">الحالة:</span>
-                  <select id="status-${id}" class="status-select" onchange="saveStatus('${id}')">
-                    <option ${status==='جديد'?'selected':''}>جديد</option>
-                    <option ${status==='قيد المراجعة'?'selected':''}>قيد المراجعة</option>
-                    <option ${status==='جاري التنفيذ'?'selected':''}>جاري التنفيذ</option>
-                    <option ${status==='معلق'?'selected':''}>معلق</option>
-                    <option ${status==='مغلق'?'selected':''}>مغلق</option>
-                    <option ${status==='مرفوض'?'selected':''}>مرفوض</option>
-                  </select>
-                </div>
-                <div><span class="status-label">القسم المرسل:</span> ${r['القسم المرسل'] || '-'}</div>
-                <div><span class="status-label">آخر تحديث بواسطة:</span> ${r['آخر تحديث بواسطة'] || '-'}</div>
-                <div><span class="status-label">بدأ التنفيذ بواسطة:</span> ${r['بدأ التنفيذ بواسطة'] || '-'}</div>
-                <div><span class="status-label">أغلق بواسطة:</span> ${r['أغلق بواسطة'] || '-'}</div>
-
-                ${status === 'جاري التنفيذ'
-                  ? `<div><span class="status-label">الوقت المنقضي:</span> <span id="timer-${id}" class="timer-text">جارٍ الحساب...</span></div>`
-                  : ''}
-              </div>
-            </div>
+  c.innerHTML = list.map(req => {
+    const status = (req['الحالة'] || '').trim();
+    return `
+      <div class="request-card" data-id="${req['رقم الطلب'] || ''}">
+        <div class="status-header ${statusToClass(status)}"></div>
+        <div class="card-content">
+          <div class="card-top">
+            <div class="request-id">#${req['رقم الطلب'] || ''}</div>
+            <div class="request-date">${req['التاريخ'] || ''}</div>
           </div>
-        `;
-      }).join('');
-    }
-
-    /* ==================== الطلبات المرسلة ==================== */
-    if (sent.length) {
-      html += `<h3 class="page-title" style="margin-top:30px">الطلبات التي أرسلتها</h3>`;
-      html += sent.map(r => `
-        <div class="request-card">
-          <div class="status-header status-${(r['الحالة']||'').replace(/\s+/g,'-')}"></div>
-          <div class="card-content">
-            <div class="card-top">
-              <div class="request-id">#${r['رقم الطلب']}</div>
-              <div class="request-date">${r['التاريخ']}</div>
-            </div>
-            <h3 class="request-title">${r['العنوان']}</h3>
-            <p class="request-desc">${r['الوصف']}</p>
-            <div class="status-info">
-              <div><span class="status-label">الحالة:</span> ${r['الحالة']}</div>
-              <div><span class="status-label">القسم المستلم:</span> ${r['القسم المستلم'] || '-'}</div>
-              <div><span class="status-label">آخر تحديث بواسطة:</span> ${r['آخر تحديث بواسطة'] || '-'}</div>
-              <div><span class="status-label">بدأ التنفيذ بواسطة:</span> ${r['بدأ التنفيذ بواسطة'] || '-'}</div>
-              <div><span class="status-label">أغلق بواسطة:</span> ${r['أغلق بواسطة'] || '-'}</div>
-            </div>
+          <h3 class="request-title">${req['العنوان'] || ''}</h3>
+          <p class="request-desc">${req['الوصف'] || ''}</p>
+          <div class="request-meta">
+            <div class="meta-item"><i class="fas fa-user"></i> المرسل: ${req['اسم المرسل'] || '-'} (${req['القسم المرسل'] || '-'})</div>
+            <div class="meta-item"><i class="fas fa-user-check"></i> المستلم: ${req['اسم المستلم'] || '-'} (${req['القسم المستلم'] || '-'})</div>
+          </div>
+          <div class="status-info">
+            <div><span class="status-label">الحالة:</span> ${status}</div>
+            <div><span class="status-label">آخر تحديث:</span> ${req['آخر تحديث بواسطة'] || '-'}</div>
           </div>
         </div>
-      `).join('');
-    }
-
-    c.innerHTML = html || '<div class="loading-message">لا توجد طلبات حالياً.</div>';
-
-    // 🔹 تفعيل العدادات الجارية
-    received.forEach(r=>{
-      if(r['الحالة']==='جاري التنفيذ'){
-        startLiveTimer(r['رقم الطلب']);
-      }
-    });
-
-  }catch(e){
-    console.error(e);
-    c.innerHTML='<div class="loading-message">حدث خطأ أثناء تحميل الطلبات.</div>';
-  }
+      </div>`;
+  }).join('');
 }
 
-/* ========= حفظ الحالة + المؤقت ========= */
-async function saveStatus(id){
-  const select=document.getElementById(`status-${id}`);
-  if(!select) return;
-  const s=select.value;
-  const startKey=`startTime_${id}`;
-  let duration=null;
+/* ========== ألوان الحالات ========== */
+function statusToClass(s) {
+  if (s.includes('جديد')) return 'status-new';
+  if (s.includes('مغلق')) return 'status-closed';
+  if (s.includes('جاري')) return 'status-in-progress';
+  if (s.includes('مرفوض')) return 'status-rejected';
+  return 'status-assigned';
+}
 
-  if(s==="جاري التنفيذ" && !localStorage.getItem(startKey)){
-    localStorage.setItem(startKey,new Date().toISOString());
-    startLiveTimer(id);
-  }
-  if(s==="مغلق" && localStorage.getItem(startKey)){
-    const diff=Date.now()-new Date(localStorage.getItem(startKey)).getTime();
-    const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),sec=Math.floor((diff%60000)/1000);
-    duration=`${h} ساعة و ${m} دقيقة و ${sec} ثانية`;
-    clearInterval(activeTimers[id]);delete activeTimers[id];
-    localStorage.removeItem(startKey);
-  }
-
-  const res=await fetch('/api/update_request_status',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({requestId:id,status:s,updater:currentUser.name,duration})
+/* ========== فلترة حسب الحالة ========== */
+function filterRequestsByStatus() {
+  const status = document.getElementById('statusFilter').value.trim();
+  const allCards = document.querySelectorAll('.request-card');
+  allCards.forEach(card => {
+    const text = card.innerText || '';
+    card.style.display = (!status || text.includes(status)) ? 'block' : 'none';
   });
-  const d=await res.json();
-  if(d && d.success){
-    alert("تم التحديث بنجاح ✅");
-    loadRequestsForUser(currentUser.department);
-  }
 }
 
-/* ========= العداد الحي ========= */
-function startLiveTimer(id){
-  const startKey=`startTime_${id}`;
-  const el=document.getElementById(`timer-${id}`);
-  if(!el) return;
-  function update(){
-    const start=localStorage.getItem(startKey);
-    if(!start) return;
-    const diff=Date.now()-new Date(start).getTime();
-    const h=Math.floor(diff/3600000),
-          m=Math.floor((diff%3600000)/60000),
-          s=Math.floor((diff%60000)/1000);
-    el.textContent=`${h} ساعة و ${m} دقيقة و ${s} ثانية`;
-  }
-  update();
-  if(activeTimers[id]) clearInterval(activeTimers[id]);
-  activeTimers[id]=setInterval(update,1000);
+
+/* ========== تصدير الطلبات ========== */
+async function exportRequests() {
+  const start = document.getElementById('startDate').value || null;
+  const end = document.getElementById('endDate').value || null;
+
+  const res = await fetch('/api/export_requests', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ department: currentUser.department, start_date: start, end_date: end })
+  });
+  const data = await res.json();
+  if (data.success && data.file) window.location.href = `/download/${data.file}`;
+  else alert('❌ حدث خطأ أثناء تصدير الطلبات');
 }
 
-  /* ========= فتح نموذج رفع الطلب ========= */
+/* ========== فتح/إغلاق نموذج الطلب ========== */
 function openNewRequestModal() {
   document.getElementById('newRequestModal').style.display = 'flex';
 }
-
-/* ========= إغلاق النموذج عند الضغط بالخارج ========= */
-document.getElementById('newRequestModal').addEventListener('click', (e)=>{
-  if(e.target.id === 'newRequestModal') e.target.style.display='none';
-});
-
-/* ========= وظائف الشات المفقودة ========= */
-function toggleChat(forceClose=false){
-  const w=document.getElementById('chatbotWidget');
-  if(forceClose){ w.classList.add('hidden'); return; }
-  w.classList.toggle('hidden');
+function closeNewRequestModal() {
+  document.getElementById('newRequestModal').style.display = 'none';
 }
+window.onclick = e => {
+  const m = document.getElementById('newRequestModal');
+  if (e.target === m) m.style.display = 'none';
+};
 
-function appendMsg(sender,text){
-  const body=document.getElementById('cbBody');
-  if(!body) return;
-  const msg=document.createElement('div');
-  msg.className='cb-msg '+(sender==='user'?'user':'bot');
-  msg.textContent=text;
-  body.appendChild(msg);
-  body.scrollTop=body.scrollHeight;
-}
-
-async function sendChat(){
-  const input=document.getElementById('cbInput');
-  const text=input.value.trim();
-  if(!text) return;
-  appendMsg('user',text);
-  input.value='';
-  const sendBtn=document.getElementById('cbSend');
-  sendBtn.disabled=true;
-
-  const typing=document.createElement('div');
-  typing.className='cb-typing';
-  typing.innerHTML='<i class="fas fa-robot"></i><span class="dots">...</span>';
-  document.getElementById('cbBody').appendChild(typing);
-
-  try{
-    const res=await fetch('/chatbot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
-    const data=await res.json();
-    typing.remove();
-    appendMsg('bot',data.reply||'❌ حدث خطأ.');
-  }catch(e){
-    typing.remove();
-    appendMsg('bot','❌ لم يتم الاتصال بالخادم.');
-  }
-  sendBtn.disabled=false;
-}
-
-  /* ========= تسجيل الخروج ========= */
+/* ========== تسجيل الخروج ========== */
 function logout() {
-  if (confirm("هل تريد تسجيل الخروج؟")) {
+  if (confirm('هل تريد تسجيل الخروج؟')) {
     localStorage.removeItem('currentUser');
     location.href = 'Login.html';
   }
 }
 
-/* ========= رفع طلب جديد (نفس أسلوب الموظف) ========= */
+
+/* ========== الشات ========== */
+function toggleChat(forceClose=false){
+  const box = document.getElementById('chatbotWidget');
+  if (forceClose) {
+    box.classList.remove('show'); // إغلاق بالقوة
+  } else {
+    box.classList.toggle('show'); // تبديل الحالة (فتح/إغلاق)
+  }
+}
+
+function appendMsg(role, text) {
+  const body = document.getElementById('cbBody');
+  const msg = document.createElement('div');
+  msg.className = 'cb-msg ' + (role === 'user' ? 'user' : 'bot');
+  msg.textContent = text;
+  body.appendChild(msg);
+  body.scrollTop = body.scrollHeight;
+}
+
+async function sendChat() {
+  const input = document.getElementById('cbInput');
+  const text = input.value.trim();
+  if (!text) return;
+  appendMsg('user', text);
+  input.value = '';
+
+  const typing = document.createElement('div');
+  typing.className = 'cb-typing';
+  typing.innerHTML = '<i class="fas fa-robot"></i><span class="dots">...</span>';
+  document.getElementById('cbBody').appendChild(typing);
+
+  try {
+    const res = await fetch('/chatbot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+    const data = await res.json();
+    typing.remove();
+    appendMsg('bot', data.reply || '❌ حدث خطأ.');
+  } catch (e) {
+    typing.remove();
+    appendMsg('bot', '❌ لم يتم الاتصال بالخادم.');
+  }
+}
+
+    /* ========= رفع طلب جديد (نفس أسلوب الموظف) ========= */
 document.getElementById('newRequestForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const title = document.getElementById('requestTitle').value.trim();
@@ -511,54 +457,20 @@ document.getElementById('newRequestForm').addEventListener('submit', async (e) =
   }
 });
 
-
-/* ========= فلترة الطلبات حسب الحالة ========= */
-function filterRequestsByStatus() {
-  const status = document.getElementById('statusFilter').value.trim();
-  const cards = document.querySelectorAll('.request-card');
-  cards.forEach(card => {
-    const select = card.querySelector('.status-select');
-    const cardStatus = select ? select.value : (card.innerText || '');
-    card.style.display = (!status || cardStatus.includes(status)) ? 'block' : 'none';
-  });
-}
-
-
-/* ========= تحديث تلقائي كل دقيقة ========= */
-setInterval(() => {
-  if (currentUser && currentUser.department) {
-    loadRequestsForUser(currentUser.department);
-  }
-}, 60000); // كل 60 ثانية
-
-
 </script>
-
 <style>
-/* ✳️ عداد الوقت الأخضر المتحرك */
-.timer-text{
-  font-weight:700;
-  color:#1b5e20;
-  background:linear-gradient(90deg,#a5d6a7,#81c784,#66bb6a);
-  padding:6px 12px;
-  border-radius:10px;
-  display:inline-block;
-  margin-top:6px;
-  animation:pulse 1.5s infinite ease-in-out;
-  box-shadow:0 0 10px rgba(102,187,106,0.4);
+.toast{
+  position:fixed;bottom:30px;left:50%;
+  transform:translateX(-50%);
+  padding:12px 25px;border-radius:10px;
+  color:#fff;font-size:15px;opacity:0;
+  transition:all .4s ease;z-index:9999;
 }
-@keyframes pulse{
-  0%{transform:scale(1);box-shadow:0 0 10px rgba(102,187,106,0.4);}
-  50%{transform:scale(1.05);box-shadow:0 0 15px rgba(102,187,106,0.6);}
-  100%{transform:scale(1);box-shadow:0 0 10px rgba(102,187,106,0.4);}
-}
-
-/* ✳️ توهج البطاقة أثناء التنفيذ */
-.card-glow{
-  border:2px solid #81c784 !important;
-  box-shadow:0 0 18px rgba(129,199,132,0.6) !important;
-  transition:all .3s ease-in-out;
-}
+.toast.show{opacity:1;bottom:50px;}
+.toast.success{background:#4caf50;}
+.toast.error{background:#e74c3c;}
+.toast.info{background:#3498db;}
+.card-glow{border:2px solid #81c784;box-shadow:0 0 15px rgba(129,199,132,0.6);}
 </style>
 
 </body>
