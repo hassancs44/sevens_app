@@ -4,296 +4,211 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>لوحة مدير القسم | SEVENS</title>
+
+  <!-- الخطوط والأيقونات -->
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
   <style>
-    * {margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif;}
+    /* 🎨 التنسيقات الأساسية */
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif;}
     body{background:#f8fbff;color:#2c3e50;min-height:100vh;}
     .navbar{background:white;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,0.06);position:sticky;top:0;z-index:100;}
     .logo-box{display:flex;align-items:center;gap:14px;}
-    .logo-box img{width:44px;height:44px;object-fit:contain;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+    .logo-box img{width:44px;height:44px;object-fit:contain;border-radius:10px;}
     .logo-box h1{color:#1e88e5;font-size:22px;font-weight:700;}
     .user-info{display:flex;align-items:center;gap:12px;color:#34495e;font-weight:600;}
-    .logout-btn{background:#e3f2fd;color:#1976d2;border:none;padding:6px 14px;border-radius:8px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .logout-btn{background:#e3f2fd;color:#1976d2;border:none;padding:6px 14px;border-radius:8px;font-weight:600;cursor:pointer;}
     .logout-btn:hover{background:#bbdefb;}
     .container{max-width:1100px;margin:30px auto;padding:0 20px;}
     .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;flex-wrap:wrap;gap:10px;}
     .page-title{font-size:26px;color:#0d47a1;font-weight:700;}
     .section-title{font-size:22px;color:#1e88e5;margin:30px 0 20px;padding-bottom:10px;border-bottom:2px solid #e3f2fd;display:flex;align-items:center;gap:10px;}
-    .new-request-btn{padding:10px 20px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:transform 0.2s,box-shadow 0.2s;}
-    .new-request-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(33,150,243,0.3);}
+    .new-request-btn{padding:10px 20px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;}
+    .new-request-btn:hover{box-shadow:0 4px 12px rgba(33,150,243,0.3);}
     .requests-grid{display:grid;gap:22px;}
     .request-card{background:white;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #eef5ff;transition:all 0.3s ease;}
     .request-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(30,136,229,0.12);}
     .status-header{height:6px;}
     .status-new{background:#2196f3;}
-    .status-assigned{background:#00bcd4;}
     .status-in-progress{background:#ff9800;}
     .status-closed{background:#4caf50;}
     .status-rejected{background:#f44336;}
     .card-content{padding:24px;}
-    .card-top{display:flex;justify-content:space-between;margin-bottom:14px;}
-    .request-id{font-weight:700;color:#1e88e5;font-size:18px;}
-    .request-date{color:#7f8c8d;font-size:14px;}
     .request-title{font-size:20px;margin-bottom:12px;color:#2c3e50;font-weight:600;}
     .request-desc{color:#555;margin-bottom:18px;line-height:1.6;font-size:15px;}
-    .request-meta{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:18px;font-size:14px;color:#34495e;}
-    .meta-item{display:flex;align-items:center;gap:6px;}
     .status-info{background:#f9fbfd;padding:12px;border-radius:12px;margin-bottom:18px;font-size:14px;color:#34495e;}
-    .status-label{font-weight:600;color:#1e88e5;}
     .no-requests{text-align:center;padding:30px;color:#7f8c8d;font-style:italic;}
-    .request-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000;}
-    .request-modal-content{background:white;width:90%;max-width:500px;border-radius:16px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
-    .form-group{margin-bottom:20px;}
-    .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#34495e;}
-    .form-control{width:100%;padding:12px;border:2px solid #e3f2fd;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:15px;direction:rtl;}
-    .submit-btn{width:100%;padding:12px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;font-size:16px;cursor:pointer;}
-    .submit-btn:hover{background:linear-gradient(to right,#1e88e5,#1565c0);}
     .export-section{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-    .export-btn{background:#43a047;color:white;padding:10px 18px;border:none;border-radius:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;}
+    .export-btn{background:#43a047;color:white;padding:10px 18px;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
     .export-btn:hover{background:#388e3c;}
+    #statusFilter{border:2px solid #e3f2fd;border-radius:10px;padding:10px;background:white;color:#0d47a1;font-weight:600;}
+    #statusFilter:focus{outline:none;border-color:#1e88e5;box-shadow:0 0 8px rgba(30,136,229,0.3);}
 
-    /* 🎨 تصميم الشات بوت المحدث */
-    .chatbot-float-btn {
-      position: fixed;
-      bottom: 25px;
-      left: 25px;
-      background: linear-gradient(135deg,#42a5f5,#1e88e5);
-      color: white;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 26px;
-      cursor: pointer;
-      box-shadow: 0 6px 20px rgba(30,136,229,0.3);
-      transition: all 0.3s ease;
-      z-index: 1000;
-    }
-    .chatbot-float-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 8px 24px rgba(30,136,229,0.5);
+    /* ✳️ توهج البطاقة أثناء التنفيذ */
+    .card-glow{
+      border:2px solid #81c784 !important;
+      box-shadow:0 0 18px rgba(129,199,132,0.6) !important;
+      transition:all .3s ease-in-out;
     }
 
-    .chatbot-widget {
-      position: fixed;
-      bottom: 100px;
-      left: 25px;
-      width: 350px;
-      max-height: 520px;
-      background: #ffffff;
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-      display: flex;
-      flex-direction: column;
-      z-index: 1000;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: all 0.3s ease;
-    }
-    .chatbot-widget:not(.hidden) {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .chatbot-widget.hidden { display: none; }
+    /* 🤖 الشات بوت */
+    .chatbot-float-btn{position:fixed;bottom:25px;left:25px;background:linear-gradient(135deg,#42a5f5,#1e88e5);color:white;width:60px;height:60px;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:26px;cursor:pointer;box-shadow:0 6px 20px rgba(30,136,229,0.3);z-index:1000;}
+    .chatbot-widget{position:fixed;bottom:100px;left:25px;width:350px;max-height:520px;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 25px rgba(0,0,0,0.15);display:none;flex-direction:column;z-index:1000;}
+    .chatbot-widget.show{display:flex;}
+    .cb-header{background:linear-gradient(135deg,#2196f3,#1565c0);color:white;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+    .cb-body{flex:1;overflow-y:auto;padding:14px;background:#f8fbff;}
+    .cb-msg{margin-bottom:12px;padding:10px 14px;border-radius:12px;max-width:80%;line-height:1.6;font-size:14px;}
+    .cb-msg.user{background:#e3f2fd;color:#0d47a1;margin-left:auto;}
+    .cb-msg.bot{background:#e8f5e9;color:#2e7d32;}
+    .cb-input{display:flex;border-top:1px solid #e3f2fd;}
+    .cb-input textarea{flex:1;border:none;padding:10px;font-family:'Tajawal';font-size:14px;resize:none;}
+    .cb-send{background:#1e88e5;color:white;border:none;padding:0 16px;cursor:pointer;}
+    /* ✅ نموذج رفع الطلب (منبثق في المنتصف) */
+.request-modal {
+  display: none; /* مخفي افتراضيًا */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.45);
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
 
-    .cb-header {
-      background: linear-gradient(135deg,#2196f3,#1565c0);
-      color:white;
-      padding:12px 16px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-    .cb-title{font-weight:700;font-size:15px;}
-    .cb-close{background:transparent;border:none;color:white;font-size:18px;cursor:pointer;}
+.request-modal-content {
+  background: #fff;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  position: relative;
+  text-align: right;
+}
 
-    .cb-body{
-      flex:1;
-      overflow-y:auto;
-      padding:14px;
-      background:#f8fbff;
-    }
-    .cb-msg{
-      margin-bottom:12px;
-      padding:10px 14px;
-      border-radius:12px;
-      max-width:80%;
-      line-height:1.6;
-      font-size:14px;
-      word-wrap:break-word;
-    }
-    .cb-msg.user{
-      background:#e3f2fd;
-      color:#0d47a1;
-      align-self:flex-end;
-      margin-left:auto;
-    }
-    .cb-msg.bot{
-      background:#e8f5e9;
-      color:#2e7d32;
-      align-self:flex-start;
-    }
-    .cb-typing{color:#aaa;font-size:14px;padding:10px;}
+.form-group {
+  margin-bottom: 20px;
+}
 
-    .cb-input{
-      display:flex;
-      border-top:1px solid #e3f2fd;
-      background:#ffffff;
-    }
-    .cb-input textarea{
-      flex:1;
-      border:none;
-      padding:10px;
-      resize:none;
-      font-family:'Tajawal',sans-serif;
-      font-size:14px;
-      outline:none;
-      background:#ffffff;
-      color:#2c3e50;
-    }
-    .cb-send{
-      background:#1e88e5;
-      color:white;
-      border:none;
-      padding:0 16px;
-      cursor:pointer;
-      transition:0.2s;
-    }
-    .cb-send:hover{background:#1565c0;}
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e3f2fd;
+  border-radius: 12px;
+  font-size: 15px;
+  direction: rtl;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to right,#2196f3,#1976d2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(to right,#1e88e5,#1565c0);
+}
+
   </style>
 </head>
+
 <body>
-<!-- نفس محتوى الصفحة كما هو -->
-<nav class="navbar">
-  <div class="logo-box">
-    <img src="{{ url_for('static', filename='7s.jpg') }}" alt="شعار SEVENS" />
-    <h1>نظام إدارة الطلبات</h1>
-  </div>
-  <div class="user-info">
-    <span id="userWelcome">جارٍ التحميل...</span>
-    <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
-  </div>
-</nav>
+  <!-- 🔹 الشريط العلوي -->
+  <nav class="navbar">
+    <div class="logo-box">
+      <img src="{{ url_for('static', filename='7s.jpg') }}" alt="شعار SEVENS">
+      <h1>نظام إدارة الطلبات</h1>
+    </div>
+    <div class="user-info">
+      <span id="userWelcome">جارٍ التحميل...</span>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+    </div>
+  </nav>
 
-<div class="container">
-  <div class="page-header">
-    <h2 class="page-title" id="pageTitle">لوحة مدير القسم</h2>
+  <!-- 🔹 المحتوى -->
+  <div class="container">
+    <div class="page-header">
+      <h2 class="page-title" id="pageTitle">لوحة مدير القسم</h2>
 
-    <div class="export-section">
-      <input type="date" id="startDate" class="form-control" style="width:160px;">
-      <input type="date" id="endDate" class="form-control" style="width:160px;">
-      <button class="export-btn" onclick="exportRequests()"><i class="fas fa-file-excel"></i> تصدير الطلبات</button>
-      <button class="new-request-btn" onclick="openNewRequestModal()"><i class="fas fa-plus"></i> رفع طلب جديد</button>
+      <div class="export-section">
+        <select id="statusFilter" onchange="filterRequestsByStatus()">
+          <option value="">جميع الحالات</option>
+          <option value="جديد">جديد</option>
+          <option value="جاري التنفيذ">جاري التنفيذ</option>
+          <option value="مغلق">مغلق</option>
+          <option value="مرفوض">مرفوض</option>
+        </select>
+
+        <button class="export-btn" style="background:#1e88e5" onclick="loadRequests()">
+          <i class="fas fa-sync-alt"></i> تحديث
+        </button>
+
+        <input type="date" id="startDate">
+        <input type="date" id="endDate">
+        <button class="export-btn" onclick="exportRequests()"><i class="fas fa-file-excel"></i> تصدير الطلبات</button>
+        <button class="new-request-btn" onclick="openNewRequestModal()"><i class="fas fa-plus"></i> رفع طلب جديد</button>
+      </div>
+    </div>
+
+    <h3 class="section-title"><i class="fas fa-download"></i> الطلبات الواردة</h3>
+    <div class="requests-grid" id="incoming-requests"><div class="no-requests">جارٍ التحميل...</div></div>
+
+    <h3 class="section-title"><i class="fas fa-upload"></i> الطلبات المرسلة</h3>
+    <div class="requests-grid" id="outgoing-requests"><div class="no-requests">جارٍ التحميل...</div></div>
+  </div>
+
+  <!-- 🔹 نموذج رفع طلب -->
+  <div class="request-modal" id="newRequestModal">
+    <div class="request-modal-content">
+      <h3>رفع طلب جديد</h3>
+      <form id="newRequestForm">
+        <div class="form-group">
+          <label>عنوان الطلب</label>
+          <input id="requestTitle" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label>وصف الطلب</label>
+          <textarea id="requestDesc" class="form-control" rows="4" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>القسم المستلم</label>
+          <select id="targetDept" class="form-control" required>
+            <option value="">اختر القسم</option>
+            <option value="الإدارة العامة">الإدارة العامة</option>
+            <option value="الإدارة المالية">الإدارة المالية</option>
+            <option value="الموارد البشرية">الموارد البشرية</option>
+          </select>
+        </div>
+        <button type="submit" class="submit-btn">إرسال الطلب</button>
+      </form>
     </div>
   </div>
 
-  <h3 class="section-title"><i class="fas fa-download"></i> الطلبات الواردة إلى القسم</h3>
-  <div class="requests-grid" id="incoming-requests"><div class="no-requests">جارٍ التحميل...</div></div>
+  <!-- 🤖 زر الشات -->
+  <div class="chatbot-float-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
 
-  <h3 class="section-title"><i class="fas fa-upload"></i> الطلبات المرسلة من القسم</h3>
-  <div class="requests-grid" id="outgoing-requests"><div class="no-requests">جارٍ التحميل...</div></div>
-</div>
-
-<!-- نافذة رفع طلب جديد -->
-<div class="request-modal" id="newRequestModal">
-  <div class="request-modal-content">
-    <h3 class="modal-title">رفع طلب جديد</h3>
-    <form id="newRequestForm">
-      <div class="form-group">
-        <label>عنوان الطلب</label>
-        <input id="requestTitle" class="form-control" required />
-      </div>
-      <div class="form-group">
-        <label>وصف الطلب</label>
-        <textarea id="requestDesc" class="form-control" rows="4" required></textarea>
-      </div>
-      <div class="form-group">
-        <label>القسم المستلم</label>
-        <select id="targetDept" class="form-control" required>
-  <option value="">اختر القسم</option>
-
-  <!-- 🏢 الإدارات الرئيسية -->
-  <optgroup label="الإدارات الرئيسية">
-    <option value="الإدارة العامة">الإدارة العامة</option>
-    <option value="الإدارة الإدارية">الإدارة الإدارية</option>
-    <option value="الإدارة المالية">الإدارة المالية</option>
-    <option value="إدارة المراجعة">إدارة المراجعة</option>
-    <option value="إدارة تحليل البيانات">إدارة تحليل البيانات</option>
-    <option value="إدارة الموارد البشرية">إدارة الموارد البشرية</option>
-    <option value="إدارة التقنية والشبكات">إدارة التقنية والشبكات</option>
-    <option value="إدارة التسويق">إدارة التسويق</option>
-    <option value="إدارة التشغيل">إدارة التشغيل</option>
-    <option value="إدارة مكتب التأجير">إدارة مكتب التأجير</option>
-    <option value="إدارة الصيانة وقطع الغيار">إدارة الصيانة وقطع الغيار</option>
-    <option value="إدارة المبيعات">إدارة المبيعات</option>
-    <option value="إدارة المخزون - مستودع السيارات">إدارة المخزون - مستودع السيارات</option>
-    <option value="قسم المشتريات">قسم المشتريات</option>
-  </optgroup>
-
-  <!-- 💼 أقسام المبيعات -->
-  <optgroup label="أقسام المبيعات">
-    <option value="قسم المبيعات الهاتفية">قسم المبيعات الهاتفية</option>
-    <option value="قسم المبيعات الهاتفية الرياض">قسم المبيعات الهاتفية الرياض</option>
-    <option value="قسم مبيعات الصالة المدينة المنورة">قسم مبيعات الصالة المدينة المنورة</option>
-    <option value="قسم مبيعات الصالة الرياض 1">قسم مبيعات الصالة الرياض 1</option>
-    <option value="قسم مبيعات الصالة الرياض 2">قسم مبيعات الصالة الرياض 2</option>
-    <option value="قسم مبيعات الصالة - جدة">قسم مبيعات الصالة - جدة</option>
-  </optgroup>
-
-  <!-- 🔧 أقسام الصيانة والخدمات -->
-  <optgroup label="أقسام الصيانة والخدمات">
-    <option value="قسم استقبال عملاء الصيانة">قسم استقبال عملاء الصيانة</option>
-    <option value="قسم خدمة عملاء الصيانة">قسم خدمة عملاء الصيانة</option>
-    <option value="قسم الخدمات - فني صيانة">قسم الخدمات - فني صيانة</option>
-  </optgroup>
-
-  <!-- 🧾 أقسام المخزون والمشتريات -->
-  <optgroup label="أقسام المخزون والمشتريات">
-    <option value="قسم مخزون السيارات">قسم مخزون السيارات</option>
-    <option value="قسم المشتريات">قسم المشتريات</option>
-  </optgroup>
-
-  <!-- 🧹 أقسام النظافة والاستقبال -->
-  <optgroup label="أقسام النظافة والاستقبال">
-    <option value="قسم النظافة والاستقبال المدينة">قسم النظافة والاستقبال المدينة</option>
-    <option value="قسم النظافة والاستقبال الرياض 1">قسم النظافة والاستقبال الرياض 1</option>
-    <option value="قسم النظافة والاستقبال الرياض 2">قسم النظافة والاستقبال الرياض 2</option>
-    <option value="قسم النظافة والاستقبال جدة">قسم النظافة والاستقبال جدة</option>
-    <option value="قسم الاستقبال والنظافة">قسم الاستقبال والنظافة</option>
-  </optgroup>
-
-  <!-- 🏬 الفروع -->
-  <optgroup label="الفروع">
-    <option value="إدارة فرع جدة">إدارة فرع جدة</option>
-  </optgroup>
-</select>
-
-      </div>
-      <button type="submit" class="submit-btn">إرسال الطلب</button>
-    </form>
+  <!-- نافذة الشات -->
+  <div id="chatbotWidget" class="chatbot-widget">
+    <div class="cb-header">
+      <div>مساعد SEVENS</div>
+      <button class="cb-close" onclick="toggleChat(true)">✖</button>
+    </div>
+    <div id="cbBody" class="cb-body"></div>
+    <div class="cb-input">
+      <textarea id="cbInput" placeholder="اكتب رسالتك..."></textarea>
+      <button id="cbSend" class="cb-send" onclick="sendChat()">إرسال</button>
+    </div>
   </div>
-</div>
 
-<div class="chatbot-float-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
-
-<!-- نافذة الشات -->
-<div id="chatbotWidget" class="chatbot-widget hidden" aria-live="polite">
-  <div class="cb-header">
-    <div class="cb-title"><i class="fas fa-robot"></i> مساعد SEVENS</div>
-    <button class="cb-close" onclick="toggleChat(false)" title="إغلاق"><i class="fas fa-times"></i></button>
-  </div>
-  <div id="cbBody" class="cb-body"></div>
-  <div class="cb-input">
-    <textarea id="cbInput" placeholder="اكتب رسالتك... (Enter للإرسال، Shift+Enter لسطر جديد)"></textarea>
-    <button id="cbSend" class="cb-send" onclick="sendChat()">إرسال</button>
-  </div>
-</div>
-
-<script>
+  <!-- 🔹 السكربت -->
+  <script>
 /* ========== دالة توحيد النص العربي ========== */
 function normalizeArabicJS(t){
   t = (t || '').toString().trim();
@@ -301,17 +216,16 @@ function normalizeArabicJS(t){
   t = t.replace(/\s+/g, '');
   t = t.replace(/ة/g, 'ه');
   t = t.replace(/\u200f|\u200e/g, '');
-  t = t.replace(/^اداره?/g, 'اداره'); // توحيد كتابة "ادارة"
+  t = t.replace(/^اداره?/g, 'اداره');
   return t;
 }
 
 /* ========== تعريف المستخدم الحالي ========== */
 let currentUser = null;
-let cbOpen = false;
 let chatHistory = [];
 let activeTimers = {};
 
-/* ========== إقلاع الصفحة ========== */
+/* ========== عند تحميل الصفحة ========== */
 document.addEventListener('DOMContentLoaded', async () => {
   const userData = localStorage.getItem('currentUser');
   if (!userData) return location.href = 'Login.html';
@@ -326,14 +240,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
   });
 
-  if (document.getElementById('cbBody').childElementCount === 0) {
-    appendMsg('bot', 'مرحباً! أنا مساعد SEVENS. اسألني أي شيء بخصوص الطلبات أو المهام 🤖');
-  }
-
+  appendMsg('bot', 'مرحباً! أنا مساعد SEVENS. اسألني أي شيء بخصوص الطلبات أو المهام 🤖');
   await loadRequests();
+
+  // تحديث تلقائي كل دقيقة
+  setInterval(loadRequests, 60000);
 });
 
-/* ========== تحميل وعرض الطلبات ========== */
+/* ========== تحميل الطلبات ========== */
 async function loadRequests() {
   const res = await fetch('/api/get_requests', {
     method: 'POST',
@@ -341,7 +255,6 @@ async function loadRequests() {
     body: JSON.stringify({ role: currentUser.role, department: currentUser.department })
   });
   const data = await res.json();
-
   const deptStd = normalizeArabicJS(currentUser.department);
 
   const related = data.filter(r =>
@@ -349,14 +262,13 @@ async function loadRequests() {
     normalizeArabicJS(r['القسم المستلم']) === deptStd
   );
 
-  const incoming = related.filter(r => normalizeArabicJS(r['القسم المستلم']) === deptStd);
-  const outgoing = related.filter(r => normalizeArabicJS(r['القسم المرسل']) === deptStd);
+  renderRequests('incoming-requests', related.filter(r => normalizeArabicJS(r['القسم المستلم']) === deptStd));
+  renderRequests('outgoing-requests', related.filter(r => normalizeArabicJS(r['القسم المرسل']) === deptStd));
 
-  renderRequests('incoming-requests', incoming);
-  renderRequests('outgoing-requests', outgoing);
+  filterRequestsByStatus(); // للحفاظ على الفلتر بعد التحديث
 }
 
-/* ========== عرض الطلبات في الصفحة ========== */
+/* ========== عرض الطلبات ========== */
 function renderRequests(containerId, list) {
   const c = document.getElementById(containerId);
   if (!Array.isArray(list) || !list.length) {
@@ -376,13 +288,10 @@ function renderRequests(containerId, list) {
           </div>
           <h3 class="request-title">${req['العنوان'] || ''}</h3>
           <p class="request-desc">${req['الوصف'] || ''}</p>
-
-          <!-- ✅ المرسل والمستلم بالأسماء والأقسام -->
           <div class="request-meta">
             <div class="meta-item"><i class="fas fa-user"></i> المرسل: ${req['اسم المرسل'] || '-'} (${req['القسم المرسل'] || '-'})</div>
             <div class="meta-item"><i class="fas fa-user-check"></i> المستلم: ${req['اسم المستلم'] || '-'} (${req['القسم المستلم'] || '-'})</div>
           </div>
-
           <div class="status-info">
             <div><span class="status-label">الحالة:</span> ${status}</div>
             <div><span class="status-label">آخر تحديث:</span> ${req['آخر تحديث بواسطة'] || '-'}</div>
@@ -401,35 +310,16 @@ function statusToClass(s) {
   return 'status-assigned';
 }
 
-/* ========== رفع طلب جديد ========== */
-document.getElementById('newRequestForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const t = document.getElementById('requestTitle').value.trim();
-  const d = document.getElementById('requestDesc').value.trim();
-  const dept = document.getElementById('targetDept').value;
-  if (!t || !d || !dept) return alert('يرجى تعبئة جميع الحقول');
-
-  const res = await fetch('/api/create_request', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      title: t,
-      description: d,
-      targetDept: dept,
-      senderDept: currentUser.department,
-      senderName: currentUser.name
-    })
+/* ========== فلترة حسب الحالة ========== */
+function filterRequestsByStatus() {
+  const status = document.getElementById('statusFilter').value.trim();
+  const allCards = document.querySelectorAll('.request-card');
+  allCards.forEach(card => {
+    const text = card.innerText || '';
+    card.style.display = (!status || text.includes(status)) ? 'block' : 'none';
   });
-  const data = await res.json();
-  if (data && data.success) {
-    alert('تم رفع الطلب بنجاح ✅');
-    closeNewRequestModal();
-    e.target.reset();
-    loadRequests();
-  } else {
-    alert(data.message || 'فشل رفع الطلب');
-  }
-});
+}
+
 
 /* ========== تصدير الطلبات ========== */
 async function exportRequests() {
@@ -439,24 +329,20 @@ async function exportRequests() {
   const res = await fetch('/api/export_requests', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      department: currentUser.department,
-      start_date: start,
-      end_date: end
-    })
+    body: JSON.stringify({ department: currentUser.department, start_date: start, end_date: end })
   });
-
   const data = await res.json();
-  if (data.success && data.file) {
-    window.location.href = `/download/${data.file}`;
-  } else {
-    alert(data.message || 'حدث خطأ أثناء تصدير الطلبات');
-  }
+  if (data.success && data.file) window.location.href = `/download/${data.file}`;
+  else alert('❌ حدث خطأ أثناء تصدير الطلبات');
 }
 
-/* ========== فتح وإغلاق نموذج رفع الطلب ========== */
-function openNewRequestModal() { document.getElementById('newRequestModal').style.display = 'flex'; }
-function closeNewRequestModal() { document.getElementById('newRequestModal').style.display = 'none'; }
+/* ========== فتح/إغلاق نموذج الطلب ========== */
+function openNewRequestModal() {
+  document.getElementById('newRequestModal').style.display = 'flex';
+}
+function closeNewRequestModal() {
+  document.getElementById('newRequestModal').style.display = 'none';
+}
 window.onclick = e => {
   const m = document.getElementById('newRequestModal');
   if (e.target === m) m.style.display = 'none';
@@ -464,128 +350,99 @@ window.onclick = e => {
 
 /* ========== تسجيل الخروج ========== */
 function logout() {
-  if (confirm('هل أنت متأكد أنك تريد تسجيل الخروج؟')) {
+  if (confirm('هل تريد تسجيل الخروج؟')) {
     localStorage.removeItem('currentUser');
-    alert('تم تسجيل الخروج بنجاح ✅');
     location.href = 'Login.html';
   }
 }
 
-/* ========== الشات العام المصغّر ========== */
-function toggleChat(force) {
+
+/* ========== الشات ========== */
+function toggleChat(forceClose=false){
   const box = document.getElementById('chatbotWidget');
-  cbOpen = (typeof force === 'boolean') ? force : !cbOpen;
-  box.classList.toggle('hidden', !cbOpen);
-  if (cbOpen) setTimeout(() => document.getElementById('cbInput').focus(), 50);
+  if (forceClose) {
+    box.classList.remove('show'); // إغلاق بالقوة
+  } else {
+    box.classList.toggle('show'); // تبديل الحالة (فتح/إغلاق)
+  }
 }
 
 function appendMsg(role, text) {
   const body = document.getElementById('cbBody');
-  const div = document.createElement('div');
-  div.className = 'cb-msg ' + (role === 'user' ? 'user' : 'bot');
-  div.textContent = text;
-  body.appendChild(div);
+  const msg = document.createElement('div');
+  msg.className = 'cb-msg ' + (role === 'user' ? 'user' : 'bot');
+  msg.textContent = text;
+  body.appendChild(msg);
   body.scrollTop = body.scrollHeight;
 }
 
-function appendTyping() {
-  const body = document.getElementById('cbBody');
-  const wrap = document.createElement('div');
-  wrap.className = 'cb-typing'; wrap.id = 'cbTyping';
-  wrap.innerHTML = '<i class="fas fa-robot"></i> يفكر <span class="dots">...</span>';
-  body.appendChild(wrap); body.scrollTop = body.scrollHeight;
-}
-
-function removeTyping() {
-  const el = document.getElementById('cbTyping');
-  if (el) el.remove();
-}
-
 async function sendChat() {
-  const ta = document.getElementById('cbInput');
-  const btn = document.getElementById('cbSend');
-  const msg = ta.value.trim();
-  if (!msg) return;
+  const input = document.getElementById('cbInput');
+  const text = input.value.trim();
+  if (!text) return;
+  appendMsg('user', text);
+  input.value = '';
 
-  appendMsg('user', msg);
-  chatHistory.push({ role: 'user', content: msg });
-  ta.value = '';
-  btn.disabled = true;
-  appendTyping();
+  const typing = document.createElement('div');
+  typing.className = 'cb-typing';
+  typing.innerHTML = '<i class="fas fa-robot"></i><span class="dots">...</span>';
+  document.getElementById('cbBody').appendChild(typing);
 
   try {
     const res = await fetch('/chatbot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, history: chatHistory.slice(-8) })
+      body: JSON.stringify({ message: text })
     });
-
     const data = await res.json();
-    removeTyping();
+    typing.remove();
+    appendMsg('bot', data.reply || '❌ حدث خطأ.');
+  } catch (e) {
+    typing.remove();
+    appendMsg('bot', '❌ لم يتم الاتصال بالخادم.');
+  }
+}
 
-    if (data && data.reply) {
-      const reply = (data.reply || '').trim() || '...';
-      appendMsg('bot', reply);
-      chatHistory.push({ role: 'assistant', content: reply });
+    /* ========= رفع طلب جديد (نفس أسلوب الموظف) ========= */
+document.getElementById('newRequestForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const title = document.getElementById('requestTitle').value.trim();
+  const desc  = document.getElementById('requestDesc').value.trim();
+  const targetDept = document.getElementById('targetDept').value.trim();
+
+  if (!title || !desc || !targetDept) {
+    alert("الرجاء تعبئة جميع الحقول قبل الإرسال");
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/create_request', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        title,
+        description: desc,
+        targetDept,
+        senderDept: currentUser.department,
+        senderName: currentUser.name
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert("✅ تم إرسال الطلب بنجاح");
+      document.getElementById('newRequestModal').style.display = 'none';
+      document.getElementById('newRequestForm').reset();
+      loadRequests(); // يعيد تحميل الطلبات مباشرة
     } else {
-      appendMsg('bot', 'عذراً، لم أتمكن من جلب الرد حالياً.');
+      alert("❌ حدث خطأ أثناء الإرسال: " + (data.message || 'غير معروف'));
     }
   } catch (e) {
-    removeTyping();
-    appendMsg('bot', 'تعذر الاتصال بالخادم. تأكد من تشغيل الباك-إند.');
-  } finally {
-    btn.disabled = false;
+    console.error(e);
+    alert("❌ لم يتم الاتصال بالخادم");
   }
-}
+});
 
-/* ========== العداد الحي (اختياري للطلبات الجارية) ========== */
-function startLiveTimer(id) {
-  const startKey = `startTime_${id}`;
-  const el = document.getElementById(`timer-${id}`);
-  if (!el) return;
-  function update() {
-    const start = localStorage.getItem(startKey);
-    if (!start) return;
-    const diff = Date.now() - new Date(start).getTime();
-    const h = Math.floor(diff / 3600000),
-          m = Math.floor((diff % 3600000) / 60000),
-          s = Math.floor((diff % 60000) / 1000);
-    el.textContent = `${h} ساعة و ${m} دقيقة و ${s} ثانية`;
-  }
-  update();
-  if (activeTimers[id]) clearInterval(activeTimers[id]);
-  activeTimers[id] = setInterval(update, 1000);
-}
 </script>
-
-
-<style>
-/* ✳️ عداد الوقت الأخضر المتحرك */
-.timer-text{
-  font-weight:700;
-  color:#1b5e20;
-  background:linear-gradient(90deg,#a5d6a7,#81c784,#66bb6a);
-  padding:6px 12px;
-  border-radius:10px;
-  display:inline-block;
-  margin-top:6px;
-  animation:pulse 1.5s infinite ease-in-out;
-  box-shadow:0 0 10px rgba(102,187,106,0.4);
-}
-@keyframes pulse{
-  0%{transform:scale(1);box-shadow:0 0 10px rgba(102,187,106,0.4);}
-  50%{transform:scale(1.05);box-shadow:0 0 15px rgba(102,187,106,0.6);}
-  100%{transform:scale(1);box-shadow:0 0 10px rgba(102,187,106,0.4);}
-}
-
-/* ✳️ توهج البطاقة أثناء التنفيذ */
-.card-glow{
-  border:2px solid #81c784 !important;
-  box-shadow:0 0 18px rgba(129,199,132,0.6) !important;
-  transition:all .3s ease-in-out;
-}
-</style>
-
 
 </body>
 </html>
