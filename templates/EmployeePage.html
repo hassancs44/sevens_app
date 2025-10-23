@@ -119,86 +119,88 @@
     </div>
   </div>
 
-  <!-- نافذة رفع طلب جديد -->
-  <div class="request-modal" id="newRequestModal">
-    <div class="request-modal-content">
-      <h3 class="modal-title">رفع طلب جديد</h3>
-      <form id="newRequestForm">
-        <div class="form-group">
-          <label>عنوان الطلب</label>
-          <input type="text" id="requestTitle" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label>وصف الطلب</label>
-          <textarea id="requestDesc" class="form-control" rows="4" required></textarea>
-        </div>
-        <div class="form-group">
-          <label>القسم المستلم</label>
-          <select id="targetDept" class="form-control" required>
-  <option value="">اختر القسم</option>
 
-  <!-- 🏢 الإدارات الرئيسية -->
-  <optgroup label="الإدارات الرئيسية">
-    <option value="الإدارة العامة">الإدارة العامة</option>
-    <option value="الإدارة الإدارية">الإدارة الإدارية</option>
-    <option value="الإدارة المالية">الإدارة المالية</option>
-    <option value="إدارة المراجعة">إدارة المراجعة</option>
-    <option value="إدارة تحليل البيانات">إدارة تحليل البيانات</option>
-    <option value="إدارة الموارد البشرية">إدارة الموارد البشرية</option>
-    <option value="إدارة التقنية والشبكات">إدارة التقنية والشبكات</option>
-    <option value="إدارة التسويق">إدارة التسويق</option>
-    <option value="إدارة التشغيل">إدارة التشغيل</option>
-    <option value="إدارة مكتب التأجير">إدارة مكتب التأجير</option>
-    <option value="إدارة الصيانة وقطع الغيار">إدارة الصيانة وقطع الغيار</option>
-    <option value="إدارة المبيعات">إدارة المبيعات</option>
-    <option value="إدارة المخزون - مستودع السيارات">إدارة المخزون - مستودع السيارات</option>
-    <option value="قسم المشتريات">قسم المشتريات</option>
-  </optgroup>
+  <!-- 🔹 نموذج رفع طلب -->
+<div class="request-modal" id="newRequestModal">
+  <div class="request-modal-content">
+    <h3 class="modal-title">رفع طلب جديد</h3>
+    <form id="newRequestForm">
+      <div class="form-group">
+        <label>عنوان الطلب</label>
+        <input type="text" id="requestTitle" class="form-control" required>
+      </div>
 
-  <!-- 💼 أقسام المبيعات -->
-  <optgroup label="أقسام المبيعات">
-    <option value="قسم المبيعات الهاتفية">قسم المبيعات الهاتفية</option>
-    <option value="قسم المبيعات الهاتفية الرياض">قسم المبيعات الهاتفية الرياض</option>
-    <option value="قسم مبيعات الصالة المدينة المنورة">قسم مبيعات الصالة المدينة المنورة</option>
-    <option value="قسم مبيعات الصالة الرياض 1">قسم مبيعات الصالة الرياض 1</option>
-    <option value="قسم مبيعات الصالة الرياض 2">قسم مبيعات الصالة الرياض 2</option>
-    <option value="قسم مبيعات الصالة - جدة">قسم مبيعات الصالة - جدة</option>
-  </optgroup>
+      <div class="form-group">
+        <label>وصف الطلب</label>
+        <textarea id="requestDesc" class="form-control" rows="4" required></textarea>
+      </div>
 
-  <!-- 🔧 أقسام الصيانة والخدمات -->
-  <optgroup label="أقسام الصيانة والخدمات">
-    <option value="قسم استقبال عملاء الصيانة">قسم استقبال عملاء الصيانة</option>
-    <option value="قسم خدمة عملاء الصيانة">قسم خدمة عملاء الصيانة</option>
-    <option value="قسم الخدمات - فني صيانة">قسم الخدمات - فني صيانة</option>
-  </optgroup>
+      <div class="form-group">
+        <label>القسم المستلم</label>
+        <select id="targetDept" class="form-control" required>
+          <option value="">اختر القسم</option>
 
-  <!-- 🧾 أقسام المخزون والمشتريات -->
-  <optgroup label="أقسام المخزون والمشتريات">
-    <option value="قسم مخزون السيارات">قسم مخزون السيارات</option>
-    <option value="قسم المشتريات">قسم المشتريات</option>
-  </optgroup>
+          <!-- 🏢 الإدارات الرئيسية -->
+          <optgroup label="الإدارات الرئيسية">
+            <option value="الإدارة العامة">الإدارة العامة</option>
+            <option value="الإدارة الإدارية">الإدارة الإدارية</option>
+            <option value="الإدارة المالية">الإدارة المالية</option>
+            <option value="إدارة المراجعة">إدارة المراجعة</option>
+            <option value="إدارة تحليل البيانات">إدارة تحليل البيانات</option>
+            <option value="إدارة الموارد البشرية">إدارة الموارد البشرية</option>
+            <option value="إدارة التقنية والشبكات">إدارة التقنية والشبكات</option>
+            <option value="إدارة التسويق">إدارة التسويق</option>
+            <option value="إدارة التشغيل">إدارة التشغيل</option>
+            <option value="إدارة مكتب التأجير">إدارة مكتب التأجير</option>
+            <option value="إدارة الصيانة وقطع الغيار">إدارة الصيانة وقطع الغيار</option>
+            <option value="إدارة المبيعات">إدارة المبيعات</option>
+            <option value="إدارة المخزون - مستودع السيارات">إدارة المخزون - مستودع السيارات</option>
+            <option value="قسم المشتريات">قسم المشتريات</option>
+          </optgroup>
 
-  <!-- 🧹 أقسام النظافة والاستقبال -->
-  <optgroup label="أقسام النظافة والاستقبال">
-    <option value="قسم النظافة والاستقبال المدينة">قسم النظافة والاستقبال المدينة</option>
-    <option value="قسم النظافة والاستقبال الرياض 1">قسم النظافة والاستقبال الرياض 1</option>
-    <option value="قسم النظافة والاستقبال الرياض 2">قسم النظافة والاستقبال الرياض 2</option>
-    <option value="قسم النظافة والاستقبال جدة">قسم النظافة والاستقبال جدة</option>
-    <option value="قسم الاستقبال والنظافة">قسم الاستقبال والنظافة</option>
-  </optgroup>
+          <!-- 💼 أقسام المبيعات -->
+          <optgroup label="أقسام المبيعات">
+            <option value="قسم المبيعات الهاتفية">قسم المبيعات الهاتفية</option>
+            <option value="قسم المبيعات الهاتفية الرياض">قسم المبيعات الهاتفية الرياض</option>
+            <option value="قسم مبيعات الصالة المدينة المنورة">قسم مبيعات الصالة المدينة المنورة</option>
+            <option value="قسم مبيعات الصالة الرياض 1">قسم مبيعات الصالة الرياض 1</option>
+            <option value="قسم مبيعات الصالة الرياض 2">قسم مبيعات الصالة الرياض 2</option>
+            <option value="قسم مبيعات الصالة - جدة">قسم مبيعات الصالة - جدة</option>
+          </optgroup>
 
-  <!-- 🏬 الفروع -->
-  <optgroup label="الفروع">
-    <option value="إدارة فرع جدة">إدارة فرع جدة</option>
-  </optgroup>
-</select>
+          <!-- 🔧 أقسام الصيانة والخدمات -->
+          <optgroup label="أقسام الصيانة والخدمات">
+            <option value="قسم استقبال عملاء الصيانة">قسم استقبال عملاء الصيانة</option>
+            <option value="قسم خدمة عملاء الصيانة">قسم خدمة عملاء الصيانة</option>
+            <option value="قسم الخدمات - فني صيانة">قسم الخدمات - فني صيانة</option>
+          </optgroup>
 
+          <!-- 🧾 أقسام المخزون والمشتريات -->
+          <optgroup label="أقسام المخزون والمشتريات">
+            <option value="قسم مخزون السيارات">قسم مخزون السيارات</option>
+            <option value="قسم المشتريات">قسم المشتريات</option>
+          </optgroup>
 
-        </div>
-        <button type="submit" class="submit-btn">إرسال الطلب</button>
-      </form>
-    </div>
+          <!-- 🧹 أقسام النظافة والاستقبال -->
+          <optgroup label="أقسام النظافة والاستقبال">
+            <option value="قسم النظافة والاستقبال المدينة">قسم النظافة والاستقبال المدينة</option>
+            <option value="قسم النظافة والاستقبال الرياض 1">قسم النظافة والاستقبال الرياض 1</option>
+            <option value="قسم النظافة والاستقبال الرياض 2">قسم النظافة والاستقبال الرياض 2</option>
+            <option value="قسم النظافة والاستقبال جدة">قسم النظافة والاستقبال جدة</option>
+            <option value="قسم الاستقبال والنظافة">قسم الاستقبال والنظافة</option>
+          </optgroup>
+
+          <!-- 🏬 الفروع -->
+          <optgroup label="الفروع">
+            <option value="إدارة فرع جدة">إدارة فرع جدة</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> إرسال الطلب</button>
+    </form>
   </div>
+</div>
 
   <!-- زر الشات العائم -->
   <div class="chatbot-float-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
@@ -215,6 +217,7 @@
     <button id="cbSend" class="cb-send" onclick="sendChat()">إرسال</button>
   </div>
   </div>
+
 <script>
 let currentUser=null;
 let activeTimers={};
@@ -407,6 +410,128 @@ function startLiveTimer(id){
   if(activeTimers[id]) clearInterval(activeTimers[id]);
   activeTimers[id]=setInterval(update,1000);
 }
+
+  /* ========= فتح نموذج رفع الطلب ========= */
+function openNewRequestModal() {
+  document.getElementById('newRequestModal').style.display = 'flex';
+}
+
+/* ========= إغلاق النموذج عند الضغط بالخارج ========= */
+document.getElementById('newRequestModal').addEventListener('click', (e)=>{
+  if(e.target.id === 'newRequestModal') e.target.style.display='none';
+});
+
+/* ========= وظائف الشات المفقودة ========= */
+function toggleChat(forceClose=false){
+  const w=document.getElementById('chatbotWidget');
+  if(forceClose){ w.classList.add('hidden'); return; }
+  w.classList.toggle('hidden');
+}
+
+function appendMsg(sender,text){
+  const body=document.getElementById('cbBody');
+  if(!body) return;
+  const msg=document.createElement('div');
+  msg.className='cb-msg '+(sender==='user'?'user':'bot');
+  msg.textContent=text;
+  body.appendChild(msg);
+  body.scrollTop=body.scrollHeight;
+}
+
+async function sendChat(){
+  const input=document.getElementById('cbInput');
+  const text=input.value.trim();
+  if(!text) return;
+  appendMsg('user',text);
+  input.value='';
+  const sendBtn=document.getElementById('cbSend');
+  sendBtn.disabled=true;
+
+  const typing=document.createElement('div');
+  typing.className='cb-typing';
+  typing.innerHTML='<i class="fas fa-robot"></i><span class="dots">...</span>';
+  document.getElementById('cbBody').appendChild(typing);
+
+  try{
+    const res=await fetch('/chatbot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
+    const data=await res.json();
+    typing.remove();
+    appendMsg('bot',data.reply||'❌ حدث خطأ.');
+  }catch(e){
+    typing.remove();
+    appendMsg('bot','❌ لم يتم الاتصال بالخادم.');
+  }
+  sendBtn.disabled=false;
+}
+
+  /* ========= تسجيل الخروج ========= */
+function logout() {
+  if (confirm("هل تريد تسجيل الخروج؟")) {
+    localStorage.removeItem('currentUser');
+    location.href = 'Login.html';
+  }
+}
+
+/* ========= رفع طلب جديد (نفس أسلوب الموظف) ========= */
+document.getElementById('newRequestForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const title = document.getElementById('requestTitle').value.trim();
+  const desc  = document.getElementById('requestDesc').value.trim();
+  const targetDept = document.getElementById('targetDept').value.trim();
+
+  if (!title || !desc || !targetDept) {
+    alert("الرجاء تعبئة جميع الحقول قبل الإرسال");
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/create_request', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        title,
+        description: desc,
+        targetDept,
+        senderDept: currentUser.department,
+        senderName: currentUser.name
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert("✅ تم إرسال الطلب بنجاح");
+      document.getElementById('newRequestModal').style.display = 'none';
+      document.getElementById('newRequestForm').reset();
+      loadRequests(); // يعيد تحميل الطلبات مباشرة
+    } else {
+      alert("❌ حدث خطأ أثناء الإرسال: " + (data.message || 'غير معروف'));
+    }
+  } catch (e) {
+    console.error(e);
+    alert("❌ لم يتم الاتصال بالخادم");
+  }
+});
+
+
+/* ========= فلترة الطلبات حسب الحالة ========= */
+function filterRequestsByStatus() {
+  const status = document.getElementById('statusFilter').value.trim();
+  const cards = document.querySelectorAll('.request-card');
+  cards.forEach(card => {
+    const select = card.querySelector('.status-select');
+    const cardStatus = select ? select.value : (card.innerText || '');
+    card.style.display = (!status || cardStatus.includes(status)) ? 'block' : 'none';
+  });
+}
+
+
+/* ========= تحديث تلقائي كل دقيقة ========= */
+setInterval(() => {
+  if (currentUser && currentUser.department) {
+    loadRequestsForUser(currentUser.department);
+  }
+}, 60000); // كل 60 ثانية
+
+
 </script>
 
 <style>
