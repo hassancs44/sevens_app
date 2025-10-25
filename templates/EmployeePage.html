@@ -121,11 +121,12 @@
   <h3 class="page-title" style="margin-top:30px;">الطلبات التي أرسلتها</h3>
   <div id="outgoing-requests"></div>
 </div>
+</div> <!-- إغلاق requests-grid -->
 
 
-
-  <!-- 🔹 نموذج رفع طلب -->
+<!-- 🔹 نموذج رفع طلب -->
 <div class="request-modal" id="newRequestModal">
+
   <div class="request-modal-content">
     <h3 class="modal-title">رفع طلب جديد</h3>
     <form id="newRequestForm">
@@ -209,18 +210,22 @@
   <!-- زر الشات العائم -->
   <div class="chatbot-float-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
 
+
 <!-- نافذة الشات -->
 <div id="chatbotWidget" class="chatbot-widget hidden" aria-live="polite">
   <div class="cb-header">
     <div class="cb-title"><i class="fas fa-robot"></i> مساعد SEVENS</div>
     <button class="cb-close" onclick="toggleChat(false)" title="إغلاق"><i class="fas fa-times"></i></button>
   </div>
+
   <div id="cbBody" class="cb-body"></div>
+
   <div class="cb-input">
     <textarea id="cbInput" placeholder="اكتب رسالتك... (Enter للإرسال، Shift+Enter لسطر جديد)"></textarea>
     <button id="cbSend" class="cb-send" onclick="sendChat()">إرسال</button>
   </div>
-  </div>
+</div>
+
 
 <!-- 🔹 السكربت -->
   <script>
