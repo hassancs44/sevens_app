@@ -548,6 +548,43 @@ def chat_get(req_id):
     return jsonify(msgs)
 
 
+
+# ============== API: استعادة / إعادة تعيين كلمة المرور ==============
+@app.route('/api/forgot_reset_password', methods=['POST'])
+def forgot_reset_password():
+    """تحديث كلمة المرور عبر البريد الإلكتروني"""
+    try:
+        data = request.get_json() or {}
+        email = (data.get('email', '') or '').strip().lower()
+        new_password = (data.get('newPassword', '') or '').strip()
+
+        if not email or not new_password:
+            return jsonify({"success": False, "message": "يرجى إدخال البريد وكلمة المرور الجديدة"}), 400
+
+        df = load_users()
+        if df.empty:
+            return jsonify({"success": False, "message": "قاعدة بيانات المستخدمين فارغة"}), 500
+        if 'البريد الإلكتروني' not in df.columns:
+            return jsonify({"success": False, "message": "عمود البريد الإلكتروني غير موجود"}), 500
+
+        # 🔹 توحيد البريد الإلكتروني للمقارنة
+        df['البريد الإلكتروني'] = df['البريد الإلكتروني'].astype(str).str.lower().str.strip()
+
+        # 🔍 البحث عن المستخدم
+        mask = df['البريد الإلكتروني'] == email
+        if not mask.any():
+            return jsonify({"success": False, "message": "البريد الإلكتروني غير موجود"}), 404
+
+        # ✏️ تحديث كلمة المرور
+        df.loc[mask, 'كلمة المرور'] = new_password
+        df.to_excel(DB_PATH, index=False)
+
+        return jsonify({"success": True, "message": "تم تحديث كلمة المرور بنجاح ✅"})
+
+    except Exception as e:
+        print("❌ forgot_reset_password error:", e)
+        return jsonify({"success": False, "message": "حدث خطأ أثناء تحديث كلمة المرور"})
+
 # ============== التشغيل ==============
 if __name__ == "__main__":
     import os
