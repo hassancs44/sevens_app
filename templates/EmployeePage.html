@@ -202,6 +202,12 @@
         </select>
       </div>
 
+      <div class="form-group">
+  <label>إرفاق ملف (اختياري)</label>
+  <input type="file" id="requestFile" class="form-control" accept=".pdf,.jpg,.png,.docx,.xlsx"/>
+</div>
+
+
       <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> إرسال الطلب</button>
     </form>
   </div>
@@ -308,18 +314,27 @@ function renderRequests(containerId, list) {
           </div>
           <h3 class="request-title">${req['العنوان'] || ''}</h3>
           <p class="request-desc">${req['الوصف'] || ''}</p>
+
           <div class="request-meta">
             <div class="meta-item"><i class="fas fa-user"></i> المرسل: ${req['اسم المرسل'] || '-'} (${req['القسم المرسل'] || '-'})</div>
             <div class="meta-item"><i class="fas fa-user-check"></i> المستلم: ${req['اسم المستلم'] || '-'} (${req['القسم المستلم'] || '-'})</div>
           </div>
+
           <div class="status-info">
             <div><span class="status-label">الحالة:</span> ${status}</div>
             <div><span class="status-label">آخر تحديث:</span> ${req['آخر تحديث بواسطة'] || '-'}</div>
           </div>
+
+          ${req['الملف']
+            ? `<div class="meta-item"><i class="fas fa-paperclip"></i>
+                 <a href="/uploads/${req['الملف']}" target="_blank">عرض المرفق</a>
+               </div>`
+            : `<div class="meta-item"><i class="fas fa-paperclip"></i> لا يوجد مرفق</div>`}
         </div>
       </div>`;
   }).join('');
 }
+
 
 /* ========== ألوان الحالات ========== */
 function statusToClass(s) {
@@ -423,36 +438,40 @@ async function sendChat() {
   }
 }
 
-    /* ========= رفع طلب جديد (نفس أسلوب الموظف) ========= */
+    /* ========= رفع طلب جديد  ========= */
 document.getElementById('newRequestForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const title = document.getElementById('requestTitle').value.trim();
   const desc  = document.getElementById('requestDesc').value.trim();
   const targetDept = document.getElementById('targetDept').value.trim();
+  const fileInput = document.getElementById('requestFile');
 
   if (!title || !desc || !targetDept) {
     alert("الرجاء تعبئة جميع الحقول قبل الإرسال");
     return;
   }
 
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('description', desc);
+  formData.append('targetDept', targetDept);
+  formData.append('senderDept', currentUser.department);
+  formData.append('senderName', currentUser.name);
+  if (fileInput.files.length > 0) {
+    formData.append('file', fileInput.files[0]);
+  }
+
   try {
     const res = await fetch('/api/create_request', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        title,
-        description: desc,
-        targetDept,
-        senderDept: currentUser.department,
-        senderName: currentUser.name
-      })
+      body: formData
     });
     const data = await res.json();
     if (data.success) {
       alert("✅ تم إرسال الطلب بنجاح");
-      document.getElementById('newRequestModal').style.display = 'none';
+      closeNewRequestModal();
       document.getElementById('newRequestForm').reset();
-      loadRequests(); // يعيد تحميل الطلبات مباشرة
+      loadRequests();
     } else {
       alert("❌ حدث خطأ أثناء الإرسال: " + (data.message || 'غير معروف'));
     }
@@ -461,6 +480,7 @@ document.getElementById('newRequestForm').addEventListener('submit', async (e) =
     alert("❌ لم يتم الاتصال بالخادم");
   }
 });
+
 
 </script>
 <style>
