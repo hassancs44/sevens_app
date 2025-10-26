@@ -6,6 +6,17 @@ from datetime import datetime
 import requests
 import re
 
+
+
+
+# ✅ تعريف المجلد الأساسي للمشروع
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# ✅ إنشاء مجلد الرفع
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
 def normalize_arabic(text):
     """توحيد النصوص العربية لتفادي اختلاف الهمزات والمسافات"""
     if not isinstance(text, str):
@@ -276,42 +287,50 @@ def get_requests():
         print("get_requests error:", e)
         return jsonify([])
 
-
 @app.route('/api/create_request', methods=['POST'])
 def create_request():
     try:
-        data = request.get_json()
-        title  = (data.get('title','') or '').strip()
-        desc   = (data.get('description','') or '').strip()
-        target = (data.get('targetDept','') or '').strip()
-        sender = (data.get('senderDept','') or '').strip()
-        sender_name = (data.get('senderName','') or '').strip()
+        title  = request.form.get('title', '').strip()
+        desc   = request.form.get('description', '').strip()
+        target = request.form.get('targetDept', '').strip()
+        sender = request.form.get('senderDept', '').strip()
+        sender_name = request.form.get('senderName', '').strip()
 
-        if not all([title,desc,target,sender]):
+        file = request.files.get('file')
+
+        if not all([title, desc, target, sender]):
             return jsonify({"success": False, "message": "جميع الحقول مطلوبة"}), 400
 
         df = load_requests()
         for col in ['رقم الطلب','التاريخ','العنوان','الوصف','القسم المرسل','القسم المستلم',
-                    'الحالة','الموظف المعين','آخر تحديث بواسطة','الوقت','بدأ التنفيذ بواسطة','أغلق بواسطة']:
+                    'الحالة','الموظف المعين','آخر تحديث بواسطة','الوقت','بدأ التنفيذ بواسطة','أغلق بواسطة','الملف']:
             if col not in df.columns:
                 df[col] = ""
 
-        # 🔹 نضيف "بدأ التنفيذ بواسطة" و"أغلق بواسطة" لسهولة تتبع من قام بالتغييرات
+        req_id = generate_request_id()
+        file_name = ""
+        if file:
+            safe_name = f"{req_id}_{file.filename}"
+            file_path = os.path.join(UPLOAD_DIR, safe_name)
+            file.save(file_path)
+            file_name = safe_name
+
         new_row = {
-            'رقم الطلب': generate_request_id(),
+            'رقم الطلب': req_id,
             'التاريخ': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'العنوان': title,
             'الوصف': desc,
             'القسم المرسل': sender,
-            'اسم المرسل': sender_name,  # ✅ جديد
+            'اسم المرسل': sender_name,
             'القسم المستلم': target,
-            'اسم المستلم': '',  # ✅ سيُملأ لاحقًا عند الرد أو التنفيذ
+            'اسم المستلم': '',
             'الحالة': 'جديد',
             'الموظف المعين': '-',
             'آخر تحديث بواسطة': sender_name or '-',
             'بدأ التنفيذ بواسطة': '',
             'أغلق بواسطة': '',
-            'الوقت': ''
+            'الوقت': '',
+            'الملف': file_name
         }
 
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
@@ -320,6 +339,12 @@ def create_request():
     except Exception as e:
         print("❌ create_request error:", e)
         return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/uploads/<path:filename>')
+def get_uploaded_file(filename):
+    return send_from_directory(UPLOAD_DIR, filename, as_attachment=True)
+
 
 @app.route('/api/update_request_status', methods=['POST'])
 def update_request_status():
