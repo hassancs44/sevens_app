@@ -84,6 +84,30 @@
     .cb-typing .dots{letter-spacing:2px;animation:blink 1.4s infinite}
     @keyframes blink{0%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
 
+    /* 🗂️ تصميم نافذة عرض المرفقات */
+.file-viewer-modal {
+  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.6);justify-content:center;align-items:center;
+  z-index:3000;padding:20px;
+}
+.file-viewer-content {
+  background:white;border-radius:16px;padding:20px;max-width:800px;
+  width:100%;max-height:90vh;overflow:auto;position:relative;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+.file-viewer-body {text-align:center;}
+.close-btn {
+  position:absolute;top:10px;left:15px;font-size:26px;
+  cursor:pointer;color:#444;transition:.2s;
+}
+.close-btn:hover {color:#e53935;}
+.view-file-btn {
+  background:#1976d2;color:white;border:none;padding:6px 12px;
+  border-radius:8px;font-weight:600;cursor:pointer;
+}
+.view-file-btn:hover {background:#1565c0;}
+
+
   </style>
 </head>
 <body>
@@ -231,6 +255,13 @@
     <button id="cbSend" class="cb-send" onclick="sendChat()">إرسال</button>
   </div>
 </div>
+<!-- 🗂️ نافذة عرض المرفقات -->
+<div id="fileViewerModal" class="file-viewer-modal" onclick="closeFileViewer(event)">
+  <div class="file-viewer-content">
+    <span class="close-btn" onclick="closeFileViewer(event)">&times;</span>
+    <div id="fileViewerBody" class="file-viewer-body"></div>
+  </div>
+</div>
 
 
 <!-- 🔹 السكربت -->
@@ -335,12 +366,14 @@ function renderRequests(containerId, list) {
           </div>
 
           ${fileName
-            ? `<div class="meta-item"><i class="fas fa-paperclip"></i>
-                 <a href="/uploads/${fileName}" target="_blank">عرض المرفق</a>
-               </div>`
-            : `<div class="meta-item"><i class="fas fa-paperclip"></i> لا يوجد مرفق</div>`}
-        </div>
-      </div>`;
+  ? `<div class="meta-item">
+       <i class="fas fa-paperclip"></i>
+       <button class="view-file-btn" onclick="openFileViewer('/uploads/${fileName}')">
+         عرض المرفق
+       </button>
+     </div>`
+  : `<div class="meta-item"><i class="fas fa-paperclip"></i> لا يوجد مرفق</div>`}
+
   }).join('');
 }
 
@@ -502,6 +535,40 @@ document.getElementById('newRequestForm').addEventListener('submit', async (e) =
     alert("❌ لم يتم الاتصال بالخادم، تأكد من أن السيرفر يعمل.");
   }
 });
+
+    /* ========== عرض المرفقات داخل النظام ========== */
+function openFileViewer(url) {
+  const viewerBody = document.getElementById('fileViewerBody');
+  viewerBody.innerHTML = ''; // تنظيف أي عرض سابق
+
+  // تحديد نوع الملف من الامتداد
+  const ext = url.split('.').pop().toLowerCase();
+
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+    viewerBody.innerHTML = `<img src="${url}" style="max-width:100%;border-radius:10px;">`;
+  }
+  else if (ext === 'pdf') {
+    viewerBody.innerHTML = `<iframe src="${url}" width="100%" height="500px" style="border:none;border-radius:10px;"></iframe>`;
+  }
+  else if (['xlsx', 'xls', 'docx', 'doc'].includes(ext)) {
+    viewerBody.innerHTML = `
+      <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${window.location.origin + url}"
+              width="100%" height="500px" frameborder="0"></iframe>`;
+  }
+  else {
+    viewerBody.innerHTML = `<p>لا يمكن عرض هذا النوع من الملفات مباشرة. يمكنك تحميله <a href="${url}" target="_blank">من هنا</a>.</p>`;
+  }
+
+  document.getElementById('fileViewerModal').style.display = 'flex';
+}
+
+function closeFileViewer(e) {
+  const modal = document.getElementById('fileViewerModal');
+  if (e.target === modal || e.target.classList.contains('close-btn')) {
+    modal.style.display = 'none';
+    document.getElementById('fileViewerBody').innerHTML = '';
+  }
+}
 
 
 </script>
