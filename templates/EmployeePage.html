@@ -107,6 +107,24 @@
 }
 .view-file-btn:hover {background:#1565c0;}
 
+/* 🎯 إصلاح نهائي للطبقات العائمة والأزرار */
+#newRequestModal,
+#fileViewerModal,
+#chatbotWidget {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ✅ تظهر الطبقات فقط وقت الفتح */
+#newRequestModal[style*="display: flex"],
+#fileViewerModal[style*="display: flex"],
+#chatbotWidget:not(.hidden) {
+  display: flex !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+}
 
   </style>
 </head>
@@ -265,7 +283,7 @@
 
 
 <!-- 🔹 السكربت -->
-  <script>
+<script>
 /* ========== دالة توحيد النص العربي ========== */
 function normalizeArabicJS(t){
   t = (t || '').toString().trim();
@@ -282,48 +300,153 @@ let currentUser = null;
 let chatHistory = [];
 let activeTimers = {};
 
-/* ========== عند تحميل الصفحة ========== */
-document.addEventListener('DOMContentLoaded', async () => {
-  const userData = localStorage.getItem('currentUser');
-  if (!userData) return location.href = 'Login.html';
+/* ========== دالة إضافة رسالة في واجهة الشات ========== */
+/* 🔹 تعريف الدالة قبل الاستدعاء */
+function appendMsg(sender, text) {
+  const cbBody = document.getElementById("cbBody");
+  if (!cbBody) return;
+  const msgDiv = document.createElement("div");
+  msgDiv.classList.add("cb-msg", sender === "user" ? "user" : "bot");
+  msgDiv.textContent = text;
+  cbBody.appendChild(msgDiv);
+  cbBody.scrollTop = cbBody.scrollHeight;
+}
+
+/* 🔹 عند تحميل الصفحة */
+window.onload = async () => {
+  console.log("🚀 بدء تشغيل الصفحة...");
+  let userData = null;
+  for (let i = 0; i < 10; i++) {
+    userData = localStorage.getItem("currentUser");
+    if (userData) break;
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  if (!userData) return location.href = "Login.html";
   currentUser = JSON.parse(userData);
-  if (currentUser.role !== 'موظف') return location.href = 'Login.html';
 
-  document.getElementById('userWelcome').textContent = `مرحباً، ${currentUser.name} (${currentUser.department})`;
-  document.getElementById('pageTitle').textContent = `لوحة  قسم ${currentUser.department}`;
+  document.getElementById("userWelcome").textContent =
+    `مرحباً، ${currentUser.name} (${currentUser.department})`;
+  document.getElementById("pageTitle").textContent =
+    `لوحة قسم ${currentUser.department}`;
 
-  const ta = document.getElementById('cbInput');
-  ta.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-  });
+  // ✅ السطر الصحيح هنا
+  appendMsg("bot", "مرحباً! أنا مساعد SEVENS، اسألني أي شيء بخصوص الطلبات 🤖");
 
-  appendMsg('bot', 'مرحباً! أنا مساعد SEVENS. اسألني أي شيء بخصوص الطلبات أو المهام 🤖');
-  await loadRequests();
+  setTimeout(() => loadRequests(), 1000);
+};
+console.log("📡 تم استدعاء loadRequests() فعلاً");
 
-  // تحديث تلقائي كل دقيقة
-  setInterval(loadRequests, 60000);
-});
+function loadRequests() {
+  loadRequestsForUser(currentUser.department);
+}
+
+
+/* ========== 🧩 دالة توحيد جميع الأقسام الموجودة بالإكسل ========== */
+function normalizeDepartmentJS(name) {
+  if (!name) return '';
+  let n = normalizeArabicJS(name).toLowerCase();
+
+  // 🏢 الإدارات الرئيسية
+  if (n.includes('الادارهالعامه')) return 'الادارهالعامه';
+  if (n.includes('الاداريه')) return 'الادارهالاداريه';
+  if (n.includes('الماليه')) return 'الادارهالماليه';
+  if (n.includes('المراجعه')) return 'ادارهالمراجعه';
+  if (n.includes('تحليل') || n.includes('البيانات')) return 'ادارهتحليلالبيانات';
+  if (n.includes('موارد') || n.includes('بشر')) return 'ادارهالمواردالبشريه';
+  if (n.includes('تقنيه') || n.includes('شبكه')) return 'ادارهالتقنيهوالشبكات';
+  if (n.includes('تسويق')) return 'ادارهالتسويق';
+  if (n.includes('تشغيل')) return 'ادارهالتشغيل';
+  if (n.includes('تاجير') || n.includes('مكتبتاجير')) return 'ادارهالمكتبتاجير';
+  if (n.includes('صيان') || n.includes('قطع')) return 'ادارهالصيانهوقطعالغيار';
+  if (n.includes('مبيعات') && !n.includes('صاله') && !n.includes('هاتفي'))
+    return 'ادارهالمبيعات';
+  if (n.includes('مخزون') || n.includes('مستودع')) return 'ادارهالمخزونمستودعالسيارات';
+  if (n.includes('مشتريات')) return 'قسمالمشتريات';
+
+  // 💼 أقسام المبيعات
+  if (n.includes('هاتفي') || n.includes('الهاتفيه')) {
+    if (n.includes('رياض')) return 'قسمالمبيعاتالهاتفيهالرياض';
+    return 'قسمالمبيعاتالهاتفيه';
+  }
+
+  if (n.includes('مبيعاتالصاله')) {
+    if (n.includes('مدينه')) return 'قسممبيعاتالصالهالمدينهمنوره';
+    if (n.includes('جده')) return 'قسممبيعاتالصالهجده';
+    if (n.includes('رياض') && n.includes('1')) return 'قسممبيعاتالصالهالرياض1';
+    if (n.includes('رياض') && n.includes('2')) return 'قسممبيعاتالصالهالرياض2';
+    return 'قسممبيعاتالصاله';
+  }
+
+  // 🔧 الصيانة والخدمات
+  if (n.includes('استقبال') && n.includes('صيان')) return 'قسماستقبالعملاءالصيانه';
+  if (n.includes('خدمه') && n.includes('عملاء')) return 'قسمخدمعملاءالصيانه';
+  if (n.includes('خدمه') && n.includes('فني')) return 'قسمالخدماتفنيصيانة';
+
+  // 🧾 المخزون والمشتريات
+  if (n.includes('مخزون') && n.includes('سيارات')) return 'قسممخزونالسيارات';
+
+  // 🧹 النظافة والاستقبال
+  if (n.includes('نظاف') || n.includes('استقبال')) {
+    if (n.includes('مدينه')) return 'قسمالنظافهوالاستقبالالمدينه';
+    if (n.includes('جده')) return 'قسمالنظافهوالاستقبالجده';
+    if (n.includes('رياض1')) return 'قسمالنظافهوالاستقبالالرياض1';
+    if (n.includes('رياض2')) return 'قسمالنظافهوالاستقبالالرياض2';
+    if (n.includes('رياض')) return 'قسمالنظافهوالاستقبالالرياض';
+    return 'قسمالاستقبالوالنظافه';
+  }
+
+  // 🏬 الفروع
+  if (n.includes('فرع') && n.includes('جده')) return 'ادارهفرعجده';
+
+  return n;
+}
 
 /* ========== تحميل الطلبات ========== */
-async function loadRequests() {
+// ✅ تحميل الطلبات بعد التعديل
+/* ========== تحميل الطلبات (بضمان التكرار التلقائي عند الفشل الأول) ========== */
+/* ========== تحميل الطلبات (فلترة مطابقة للنسخة القديمة) ========== */
+async function loadRequestsForUser(dept) {
+console.log("📨 إرسال طلب إلى السيرفر للقسم:", dept);
+
+  // عرض رسالة انتظار
+  document.getElementById('incoming-requests').innerHTML = '<div class="loading-message">جارٍ تحميل الطلبات...</div>';
+  document.getElementById('outgoing-requests').innerHTML = '';
+
+  try {
   const res = await fetch('/api/get_requests', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ role: currentUser.role, department: currentUser.department })
+    body: JSON.stringify({ role: 'موظف', department: dept })
   });
+
   const data = await res.json();
-  const deptStd = normalizeArabicJS(currentUser.department);
+  console.log("✅ الرد من السيرفر:", data);
 
-  const related = data.filter(r =>
-    normalizeArabicJS(r['القسم المرسل']) === deptStd ||
-    normalizeArabicJS(r['القسم المستلم']) === deptStd
-  );
 
-  renderRequests('incoming-requests', related.filter(r => normalizeArabicJS(r['القسم المستلم']) === deptStd));
-  renderRequests('outgoing-requests', related.filter(r => normalizeArabicJS(r['القسم المرسل']) === deptStd));
+    // 🔹 فصل الطلبات إلى واردة وصادرة مثل النسخة القديمة
+    const deptStd = normalizeArabicJS(dept);
+    const incoming = data.filter(r => {
+      const recv = normalizeArabicJS(r['القسم المستلم']);
+      return recv.includes(deptStd) || deptStd.includes(recv);
+    });
 
-  filterRequestsByStatus(); // للحفاظ على الفلتر بعد التحديث
+    const outgoing = data.filter(r => {
+      const send = normalizeArabicJS(r['القسم المرسل']);
+      return send.includes(deptStd) || deptStd.includes(send);
+    });
+
+    // ✅ عرض النتائج في أقسامها
+    renderRequests('incoming-requests', incoming);
+    renderRequests('outgoing-requests', outgoing);
+
+  } catch (e) {
+    console.error('❌ فشل تحميل الطلبات:', e);
+    document.getElementById('incoming-requests').innerHTML = '<div class="error-message">حدث خطأ أثناء تحميل الطلبات</div>';
+  }
 }
+
+
 
 /* ========== عرض الطلبات ========== */
 function renderRequests(containerId, list) {
@@ -366,17 +489,17 @@ function renderRequests(containerId, list) {
           </div>
 
           ${fileName
-  ? `<div class="meta-item">
-       <i class="fas fa-paperclip"></i>
-       <button class="view-file-btn" onclick="openFileViewer('/uploads/${fileName}')">
-         عرض المرفق
-       </button>
-     </div>`
-  : `<div class="meta-item"><i class="fas fa-paperclip"></i> لا يوجد مرفق</div>`}
-
+            ? `<div class="meta-item">
+                 <i class="fas fa-paperclip"></i>
+                 <button class="view-file-btn" onclick="openFileViewer('/uploads/${fileName}')">
+                   عرض المرفق
+                 </button>
+               </div>`
+            : `<div class="meta-item"><i class="fas fa-paperclip"></i> لا يوجد مرفق</div>`}
+        </div>
+      </div>`;
   }).join('');
 }
-
 
 /* ========== ألوان الحالات ========== */
 function statusToClass(s) {
@@ -397,165 +520,61 @@ function filterRequestsByStatus() {
   });
 }
 
-
-/* ========== تصدير الطلبات ========== */
-async function exportRequests() {
-  const start = document.getElementById('startDate').value || null;
-  const end = document.getElementById('endDate').value || null;
-
-  const res = await fetch('/api/export_requests', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ department: currentUser.department, start_date: start, end_date: end })
-  });
-  const data = await res.json();
-  if (data.success && data.file) window.location.href = `/download/${data.file}`;
-  else alert('❌ حدث خطأ أثناء تصدير الطلبات');
-}
-
-/* ========== فتح/إغلاق نموذج الطلب ========== */
-function openNewRequestModal() {
-  document.getElementById('newRequestModal').style.display = 'flex';
-}
-function closeNewRequestModal() {
-  document.getElementById('newRequestModal').style.display = 'none';
-}
-window.onclick = e => {
-  const m = document.getElementById('newRequestModal');
-  if (e.target === m) m.style.display = 'none';
-};
-
-/* ========== تسجيل الخروج ========== */
-function logout() {
-  if (confirm('هل تريد تسجيل الخروج؟')) {
-    localStorage.removeItem('currentUser');
-    location.href = 'Login.html';
-  }
-}
-
-
-/* ========== الشات ========== */
-function toggleChat(forceClose=false){
-  const box = document.getElementById('chatbotWidget');
-  if (forceClose) {
-    box.classList.remove('show'); // إغلاق بالقوة
-  } else {
-    box.classList.toggle('show'); // تبديل الحالة (فتح/إغلاق)
-  }
-}
-
-function appendMsg(role, text) {
-  const body = document.getElementById('cbBody');
-  const msg = document.createElement('div');
-  msg.className = 'cb-msg ' + (role === 'user' ? 'user' : 'bot');
-  msg.textContent = text;
-  body.appendChild(msg);
-  body.scrollTop = body.scrollHeight;
-}
-
-async function sendChat() {
-  const input = document.getElementById('cbInput');
-  const text = input.value.trim();
-  if (!text) return;
-  appendMsg('user', text);
-  input.value = '';
-
-  const typing = document.createElement('div');
-  typing.className = 'cb-typing';
-  typing.innerHTML = '<i class="fas fa-robot"></i><span class="dots">...</span>';
-  document.getElementById('cbBody').appendChild(typing);
-
-  try {
-    const res = await fetch('/chatbot', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text })
-    });
-    const data = await res.json();
-    typing.remove();
-    appendMsg('bot', data.reply || '❌ حدث خطأ.');
-  } catch (e) {
-    typing.remove();
-    appendMsg('bot', '❌ لم يتم الاتصال بالخادم.');
-  }
-}
-
-    /* ========= رفع طلب جديد  ========= */
-// 🎯 التعامل مع رفع الطلب الجديد
+/* ========== إرسال طلب جديد ========== */
 document.getElementById('newRequestForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  // 🔹 جلب القيم من النموذج
   const title = document.getElementById('requestTitle').value.trim();
   const desc  = document.getElementById('requestDesc').value.trim();
   const targetDept = document.getElementById('targetDept').value.trim();
   const fileInput = document.getElementById('requestFile');
 
-  // 🔸 التحقق من الحقول الأساسية
   if (!title || !desc || !targetDept) {
     alert("الرجاء تعبئة جميع الحقول قبل الإرسال");
     return;
   }
 
-  // 🔹 إعداد البيانات للإرسال
   const formData = new FormData();
   formData.append('title', title);
   formData.append('description', desc);
   formData.append('targetDept', targetDept);
   formData.append('senderDept', currentUser.department);
   formData.append('senderName', currentUser.name);
-
-  // 🔸 إضافة الملف إن وُجد
   if (fileInput.files.length > 0) {
     formData.append('file', fileInput.files[0]);
   }
 
   try {
-    // 🔹 إرسال الطلب إلى السيرفر
-    const res = await fetch('/api/create_request', {
-      method: 'POST',
-      body: formData // لا تضع Content-Type هنا، يحدد تلقائيًا
-    });
-
-    // 🔸 قراءة الرد من السيرفر
+    const res = await fetch('/api/create_request', { method: 'POST', body: formData });
     const data = await res.json();
 
-    // 🔹 التعامل مع النتيجة
     if (data.success) {
       alert("✅ تم إرسال الطلب بنجاح");
-      closeNewRequestModal();                  // إغلاق النافذة
-      document.getElementById('newRequestForm').reset();  // إعادة تعيين النموذج
-      renderRequests('requestsContainer', await fetchRequests()); // تحديث الطلبات
+      closeNewRequestModal();
+      document.getElementById('newRequestForm').reset();
+      await loadRequests(); // ✅ تحديث الطلبات بعد الإرسال
     } else {
       alert("❌ حدث خطأ أثناء الإرسال: " + (data.message || 'غير معروف'));
     }
-
   } catch (e) {
     console.error('❌ خطأ أثناء الإرسال:', e);
     alert("❌ لم يتم الاتصال بالخادم، تأكد من أن السيرفر يعمل.");
   }
 });
 
-    /* ========== عرض المرفقات داخل النظام ========== */
+/* ========== عرض المرفقات ========== */
 function openFileViewer(url) {
   const viewerBody = document.getElementById('fileViewerBody');
-  viewerBody.innerHTML = ''; // تنظيف أي عرض سابق
-
-  // تحديد نوع الملف من الامتداد
+  viewerBody.innerHTML = '';
   const ext = url.split('.').pop().toLowerCase();
 
   if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
     viewerBody.innerHTML = `<img src="${url}" style="max-width:100%;border-radius:10px;">`;
-  }
-  else if (ext === 'pdf') {
+  } else if (ext === 'pdf') {
     viewerBody.innerHTML = `<iframe src="${url}" width="100%" height="500px" style="border:none;border-radius:10px;"></iframe>`;
-  }
-  else if (['xlsx', 'xls', 'docx', 'doc'].includes(ext)) {
-    viewerBody.innerHTML = `
-      <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${window.location.origin + url}"
-              width="100%" height="500px" frameborder="0"></iframe>`;
-  }
-  else {
+  } else if (['xlsx', 'xls', 'docx', 'doc'].includes(ext)) {
+    viewerBody.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${window.location.origin + url}" width="100%" height="500px" frameborder="0"></iframe>`;
+  } else {
     viewerBody.innerHTML = `<p>لا يمكن عرض هذا النوع من الملفات مباشرة. يمكنك تحميله <a href="${url}" target="_blank">من هنا</a>.</p>`;
   }
 
@@ -570,8 +589,59 @@ function closeFileViewer(e) {
   }
 }
 
+/* ========== فتح وغلق نموذج الطلب الجديد مع الإغلاق عند النقر بالخارج ========== */
+function openNewRequestModal() {
+  const modal = document.getElementById('newRequestModal');
+  modal.style.display = 'flex';
+  modal.style.opacity = '1';
+  modal.style.pointerEvents = 'auto';
+
+  // ✅ إضافة مراقب للنقر خارج النافذة بعد فتحها بقليل لتجنب التقاط نقرة الزر نفسه
+  setTimeout(() => {
+    document.addEventListener('click', handleOutsideClick);
+  }, 200);
+}
+
+function closeNewRequestModal() {
+  const modal = document.getElementById('newRequestModal');
+  modal.style.display = 'none';
+  modal.style.opacity = '0';
+  modal.style.pointerEvents = 'none';
+
+  // ✅ إزالة المراقب بعد الإغلاق
+  document.removeEventListener('click', handleOutsideClick);
+}
+
+// 🔹 دالة تتحقق من النقر خارج نافذة المحتوى
+function handleOutsideClick(e) {
+  const modal = document.getElementById('newRequestModal');
+  const content = modal.querySelector('.request-modal-content');
+  const openButton = document.querySelector('.new-request-btn'); // زر الفتح نفسه
+
+  // ✅ إذا المستخدم ضغط خارج النافذة، وليس على الزر
+  if (
+    modal.style.display === 'flex' &&
+    !content.contains(e.target) &&
+    e.target !== openButton &&
+    !openButton.contains(e.target)
+  ) {
+    closeNewRequestModal();
+  }
+}
+
+
+/* ========== زر الخروج ========== */
+function logout() {
+  if (confirm('هل أنت متأكد أنك تريد تسجيل الخروج؟')) {
+    localStorage.removeItem('currentUser');
+    alert('تم تسجيل الخروج بنجاح ✅');
+    window.location.href = 'Login.html';
+  }
+}
+
 
 </script>
+
 <style>
 .toast{
   position:fixed;bottom:30px;left:50%;
