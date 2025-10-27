@@ -72,6 +72,24 @@
     .cb-typing{align-self:flex-start;color:#888;font-size:12px;display:flex;align-items:center;gap:6px}
     .cb-typing .dots{letter-spacing:2px;animation:blink 1.4s infinite}
     @keyframes blink{0%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+
+    /* ✅ إصلاح مشكلة الأزرار غير القابلة للنقر */
+.chatbot-widget.hidden,
+.file-viewer-modal:not([style*="display: flex"]) {
+  pointer-events: none !important;
+  opacity: 0;
+}
+
+.chatbot-widget.hidden {
+  display: none !important;
+}
+
+/* ضمان أن النوافذ العائمة لا تغطي إلا عند الفتح */
+.chatbot-widget,
+.file-viewer-modal {
+  pointer-events: auto;
+}
+
   </style>
 </head>
 <body>
@@ -262,7 +280,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (currentUser.role !== 'مدير عام') return location.href = 'Login.html';
   document.getElementById('userWelcome').textContent = `مرحباً، ${currentUser.name}`;
   await loadDepartments();
-  await renderRequests('all');
+  const data = await fetchRequests();
+  renderRequests('all', data);
 });
 
 async function loadDepartments() {
@@ -299,10 +318,11 @@ function renderRequests(containerId, list) {
   c.innerHTML = list.map(req => {
     const status = (req['الحالة'] || '').trim();
     const fileName = req['الملف'] || '';
+    const statusClass = mapStatus(status);
 
     return `
       <div class="request-card" data-id="${req['رقم الطلب'] || ''}">
-        <div class="status-header ${statusToClass(status)}"></div>
+        <div class="status-header ${statusClass}"></div>
         <div class="card-content">
           <div class="card-top">
             <div class="request-id">#${req['رقم الطلب'] || ''}</div>
@@ -313,16 +333,20 @@ function renderRequests(containerId, list) {
           <p class="request-desc">${req['الوصف'] || ''}</p>
 
           <div class="request-meta">
-            <div class="meta-item"><i class="fas fa-user"></i> المرسل: ${req['اسم المرسل'] || '-'} (${req['القسم المرسل'] || '-'})</div>
-            <div class="meta-item"><i class="fas fa-user-check"></i> المستلم: ${req['اسم المستلم'] || '-'} (${req['القسم المستلم'] || '-'})</div>
+            <div class="meta-item"><i class="fas fa-user"></i>
+              المرسل: ${req['اسم المرسل'] || '-'} (${req['القسم المرسل'] || '-'})
+            </div>
+            <div class="meta-item"><i class="fas fa-user-check"></i>
+              المستلم: ${req['اسم المستلم'] || '-'} (${req['القسم المستلم'] || '-'})
+            </div>
           </div>
 
-          ${
-            fileName
-              ? `<div class="meta-item"><i class="fas fa-paperclip"></i>
-                   <button class="view-file-btn" onclick="openFileViewer('/uploads/${fileName}', '${req['العنوان'] || 'مرفق'}')">عرض المرفق</button>
-                 </div>`
-              : `<div class="meta-item"><i class="fas fa-paperclip"></i> لا يوجد مرفق</div>`
+          ${fileName
+            ? `<div class="meta-item"><i class="fas fa-paperclip"></i>
+                 <button class="view-file-btn"
+                   onclick="openFileViewer('/uploads/${fileName}', '${req['العنوان'] || 'مرفق'}')">عرض المرفق</button>
+               </div>`
+            : `<div class="meta-item"><i class="fas fa-paperclip"></i> لا يوجد مرفق</div>`
           }
 
           <div class="status-info">
@@ -335,67 +359,52 @@ function renderRequests(containerId, list) {
 }
 
 function mapStatus(s) {
-  if (s.includes('جديد')) return 'new';
-  if (s.includes('مغلق')) return 'closed';
-  if (s.includes('جاري')) return 'in-progress';
-  if (s.includes('مرفوض')) return 'rejected';
-  return 'assigned';
+  if (s.includes('جديد')) return 'status-new';
+  if (s.includes('مغلق')) return 'status-closed';
+  if (s.includes('جاري')) return 'status-in-progress';
+  if (s.includes('مرفوض')) return 'status-rejected';
+  return 'status-assigned';
 }
 
 document.getElementById('newRequestForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  // 🔹 جلب القيم من النموذج
   const title = document.getElementById('requestTitle').value.trim();
   const desc  = document.getElementById('requestDesc').value.trim();
   const targetDept = document.getElementById('targetDept').value.trim();
   const fileInput = document.getElementById('requestFile');
 
-  // 🔸 التحقق من الحقول الأساسية
   if (!title || !desc || !targetDept) {
     alert("الرجاء تعبئة جميع الحقول قبل الإرسال");
     return;
   }
 
-  // 🔹 إعداد البيانات للإرسال
   const formData = new FormData();
   formData.append('title', title);
   formData.append('description', desc);
   formData.append('targetDept', targetDept);
   formData.append('senderDept', currentUser.department);
   formData.append('senderName', currentUser.name);
-
-  // 🔸 إضافة الملف إن وُجد
-  if (fileInput.files.length > 0) {
-    formData.append('file', fileInput.files[0]);
-  }
+  if (fileInput.files.length > 0) formData.append('file', fileInput.files[0]);
 
   try {
-    // 🔹 إرسال الطلب إلى السيرفر
-    const res = await fetch('/api/create_request', {
-      method: 'POST',
-      body: formData // لا تضع Content-Type هنا، يحدد تلقائيًا
-    });
-
-    // 🔸 قراءة الرد من السيرفر
+    const res = await fetch('/api/create_request', { method: 'POST', body: formData });
     const data = await res.json();
 
-    // 🔹 التعامل مع النتيجة
     if (data.success) {
       alert("✅ تم إرسال الطلب بنجاح");
-      closeNewRequestModal();                  // إغلاق النافذة
-      document.getElementById('newRequestForm').reset();  // إعادة تعيين النموذج
-      renderRequests('requestsContainer', await fetchRequests()); // تحديث الطلبات
+      closeNewRequestModal();
+      document.getElementById('newRequestForm').reset();
+      const updated = await fetchRequests();
+      renderRequests('all', updated); // ✅ تحديث الطلبات
     } else {
       alert("❌ حدث خطأ أثناء الإرسال: " + (data.message || 'غير معروف'));
     }
-
   } catch (e) {
     console.error('❌ خطأ أثناء الإرسال:', e);
     alert("❌ لم يتم الاتصال بالخادم، تأكد من أن السيرفر يعمل.");
   }
 });
-
 
 function openNewRequestModal() { newRequestModal.style.display = 'flex'; }
 function closeNewRequestModal() { newRequestModal.style.display = 'none'; }
@@ -403,31 +412,22 @@ window.onclick = e => { if (e.target === newRequestModal) closeNewRequestModal()
 
 function logout() {
   if (confirm('هل أنت متأكد أنك تريد تسجيل الخروج؟')) {
-    try {
-      localStorage.removeItem('currentUser');
-      if (!localStorage.getItem('currentUser')) {
-        alert('تم تسجيل الخروج بنجاح ✅');
-        window.location.href = 'Login.html';
-      } else alert('حدث خطأ أثناء تسجيل الخروج.');
-    } catch (e) {
-      console.error('Logout Error:', e);
-      alert('حدث خطأ أثناء تنفيذ عملية الخروج.');
-    }
+    localStorage.removeItem('currentUser');
+    alert('تم تسجيل الخروج بنجاح ✅');
+    window.location.href = 'Login.html';
   }
 }
 
- // ===================== 🔹 نظام الشات بوت الجديد =====================
+/* ========== الشات بوت ========== */
 const chatWidget = document.getElementById("chatbotWidget");
 const chatBody = document.getElementById("cbBody");
 const chatInput = document.getElementById("cbInput");
 const chatSend = document.getElementById("cbSend");
 
 function toggleChat(forceState) {
-  if (typeof forceState === "boolean") {
+  if (typeof forceState === "boolean")
     chatWidget.classList.toggle("hidden", !forceState);
-  } else {
-    chatWidget.classList.toggle("hidden");
-  }
+  else chatWidget.classList.toggle("hidden");
   if (!chatWidget.classList.contains("hidden")) chatInput.focus();
 }
 
@@ -455,7 +455,6 @@ async function sendChat() {
   }
 }
 
-// دوال مساعدة للرسائل
 function appendMessage(text, sender = "bot") {
   const div = document.createElement("div");
   div.className = `cb-msg ${sender}`;
@@ -463,7 +462,6 @@ function appendMessage(text, sender = "bot") {
   chatBody.appendChild(div);
   chatBody.scrollTop = chatBody.scrollHeight;
 }
-
 function appendTyping() {
   const div = document.createElement("div");
   div.className = "cb-typing";
@@ -472,13 +470,10 @@ function appendTyping() {
   chatBody.appendChild(div);
   chatBody.scrollTop = chatBody.scrollHeight;
 }
-
 function removeTyping() {
   const typing = document.getElementById("typing");
   if (typing) typing.remove();
 }
-
-// إرسال بالزر أو Enter
 chatInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -487,30 +482,24 @@ chatInput.addEventListener("keydown", (e) => {
 });
 chatSend.addEventListener("click", sendChat);
 
-  /* ========== عرض المرفقات داخل النظام ========== */
+/* ========== عرض المرفقات داخل النظام ========== */
 function openFileViewer(url, title = "مرفق") {
   document.getElementById('fileViewerTitle').textContent = title;
   const viewerBody = document.getElementById('fileViewerBody');
-  viewerBody.innerHTML = ''; // تنظيف العرض السابق
+  viewerBody.innerHTML = '';
 
   const ext = url.split('.').pop().toLowerCase();
-
-  if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+  if (['jpg','jpeg','png','gif','webp'].includes(ext))
     viewerBody.innerHTML = `<img src="${url}" style="max-width:100%;border-radius:10px;">`;
-  } else if (ext === 'pdf') {
+  else if (ext === 'pdf')
     viewerBody.innerHTML = `<iframe src="${url}" width="100%" height="500px" style="border:none;border-radius:10px;"></iframe>`;
-  } else if (['xlsx','xls','docx','doc'].includes(ext)) {
-    viewerBody.innerHTML = `
-      <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${window.location.origin + url}"
-              width="100%" height="500px" frameborder="0"></iframe>`;
-  } else {
-    viewerBody.innerHTML = `<p>لا يمكن عرض هذا النوع من الملفات مباشرة.
-      يمكنك تحميله <a href="${url}" target="_blank">من هنا</a>.</p>`;
-  }
+  else if (['xlsx','xls','docx','doc'].includes(ext))
+    viewerBody.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${window.location.origin + url}" width="100%" height="500px" frameborder="0"></iframe>`;
+  else
+    viewerBody.innerHTML = `<p>لا يمكن عرض هذا النوع من الملفات مباشرة. يمكنك تحميله <a href="${url}" target="_blank">من هنا</a>.</p>`;
 
   document.getElementById('fileViewerModal').style.display = 'flex';
 }
-
 function closeFileViewer(e) {
   const modal = document.getElementById('fileViewerModal');
   if (e.target === modal || e.target.classList.contains('close-btn')) {
@@ -518,7 +507,59 @@ function closeFileViewer(e) {
     document.getElementById('fileViewerBody').innerHTML = '';
   }
 }
+  /* ========== فتح وغلق نموذج الطلب الجديد ========== */
+/* ========== فتح وغلق نموذج الطلب الجديد مع الإغلاق عند النقر بالخارج ========== */
+/* ========== فتح وغلق نموذج الطلب الجديد مع الإغلاق عند النقر بالخارج ========== */
+function openNewRequestModal() {
+  const modal = document.getElementById('newRequestModal');
+  modal.style.display = 'flex';
+  modal.style.opacity = '1';
+  modal.style.pointerEvents = 'auto';
+
+  // ✅ إضافة مراقب للنقر خارج النافذة بعد فتحها بقليل لتجنب التقاط نقرة الزر نفسه
+  setTimeout(() => {
+    document.addEventListener('click', handleOutsideClick);
+  }, 200);
+}
+
+function closeNewRequestModal() {
+  const modal = document.getElementById('newRequestModal');
+  modal.style.display = 'none';
+  modal.style.opacity = '0';
+  modal.style.pointerEvents = 'none';
+
+  // ✅ إزالة المراقب بعد الإغلاق
+  document.removeEventListener('click', handleOutsideClick);
+}
+
+// 🔹 دالة تتحقق من النقر خارج نافذة المحتوى
+function handleOutsideClick(e) {
+  const modal = document.getElementById('newRequestModal');
+  const content = modal.querySelector('.request-modal-content');
+  const openButton = document.querySelector('.new-request-btn'); // زر الفتح نفسه
+
+  // ✅ إذا المستخدم ضغط خارج النافذة، وليس على الزر
+  if (
+    modal.style.display === 'flex' &&
+    !content.contains(e.target) &&
+    e.target !== openButton &&
+    !openButton.contains(e.target)
+  ) {
+    closeNewRequestModal();
+  }
+}
+
+
+/* ========== زر الخروج ========== */
+function logout() {
+  if (confirm('هل أنت متأكد أنك تريد تسجيل الخروج؟')) {
+    localStorage.removeItem('currentUser');
+    alert('تم تسجيل الخروج بنجاح ✅');
+    window.location.href = 'Login.html';
+  }
+}
 
 </script>
+
 </body>
 </html>
