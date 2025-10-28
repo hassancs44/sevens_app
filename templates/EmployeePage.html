@@ -7,126 +7,483 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif;}
-    body{background:#f8fbff;color:#2c3e50;min-height:100vh;}
-    .navbar{background:white;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,0.06);position:sticky;top:0;z-index:100;}
-    .logo-box{display:flex;align-items:center;gap:14px;}
-    .logo-box img{width:44px;height:44px;object-fit:contain;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
-    .logo-box h1{color:#1e88e5;font-size:22px;font-weight:700;}
-    .user-info{display:flex;align-items:center;gap:12px;color:#34495e;font-weight:600;}
-    .logout-btn{background:#e3f2fd;color:#1976d2;border:none;padding:6px 14px;border-radius:8px;font-weight:600;cursor:pointer;transition:all .2s;}
-    .logout-btn:hover{background:#bbdefb;}
-    .container{max-width:1100px;margin:30px auto;padding:0 20px;}
-    .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
-    .page-title{font-size:26px;color:#0d47a1;font-weight:700;}
-    .new-request-btn{padding:10px 20px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:transform .2s,box-shadow .2s;}
-    .new-request-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(33,150,243,0.3);}
-    .requests-grid{display:grid;gap:22px;}
-    .request-card{background:white;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #eef5ff;transition:all .3s;}
-    .request-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(30,136,229,0.12);}
-    .status-header{height:6px;}
-    .status-جديد{background:#2196f3;}
-    .status-قيد-المراجعة{background:#9c27b0;}
-    .status-جاري-التنفيذ{background:#ff9800;}
-    .status-معلق{background:#ff5722;}
-    .status-مغلق{background:#4caf50;}
-    .status-مرفوض{background:#f44336;}
-    .card-content{padding:24px;}
-    .card-top{display:flex;justify-content:space-between;margin-bottom:14px;}
-    .request-id{font-weight:700;color:#1e88e5;font-size:18px;}
-    .request-date{color:#7f8c8d;font-size:14px;}
-    .request-title{font-size:20px;margin-bottom:12px;color:#2c3e50;font-weight:600;}
-    .request-desc{color:#555;margin-bottom:18px;line-height:1.6;font-size:15px;}
-    .request-meta{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:18px;font-size:14px;color:#34495e;}
-    .meta-item{display:flex;align-items:center;gap:6px;}
-    .status-info{background:#f9fbfd;padding:12px;border-radius:12px;margin-bottom:18px;font-size:14px;color:#34495e;}
-    .status-label{font-weight:600;color:#1e88e5;}
-    .update-section{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
-    .status-select{padding:8px 12px;border:2px solid #e3f2fd;border-radius:10px;font-size:14px;background:white;color:#333;direction:rtl;min-width:160px;}
-    .save-btn{padding:8px 18px;background:#1e88e5;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
-    .save-btn:hover{background:#1976d2;}
-    .request-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;}
-    .request-modal-content{background:white;width:90%;max-width:500px;border-radius:16px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
-    .form-group{margin-bottom:20px;}
-    .form-control{width:100%;padding:12px;border:2px solid #e3f2fd;border-radius:12px;font-size:15px;direction:rtl;}
-    .submit-btn{width:100%;padding:12px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;font-size:16px;cursor:pointer;}
-    .submit-btn:hover{background:linear-gradient(to right,#1e88e5,#1565c0);}
-    .timer-text{font-weight:700;color:#2e7d32;background:#e8f5e9;padding:6px 12px;border-radius:10px;display:inline-block;margin-top:6px;animation:pulse 1.5s infinite;}
-    @keyframes pulse{0%{background-color:#e8f5e9;}50%{background-color:#c8e6c9;}100%{background-color:#e8f5e9;}}
 
-    /* ===== زر الشات العائم والنافذة المصغّرة ===== */
-    .chatbot-float-btn{
-      position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;
-      background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;display:flex;align-items:center;justify-content:center;
-      box-shadow:0 8px 24px rgba(25,118,210,.35);cursor:pointer;z-index:2000;transition:transform .15s ease, box-shadow .15s ease;
-    }
-    .chatbot-float-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(25,118,210,.45);}
-    .chatbot-float-btn i{font-size:22px;}
+/* 🎨 الأساسيات العامة */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Tajawal', sans-serif;
+}
 
-    .chatbot-widget{
-      position:fixed;bottom:86px;right:20px;width:340px;max-height:520px;background:#fff;border:1px solid #e6eefc;border-radius:16px;
-      box-shadow:0 14px 40px rgba(0,0,0,.12);display:flex;flex-direction:column;overflow:hidden;z-index:2000;
-    }
-    .hidden{display:none !important;}
-    .cb-header{background:linear-gradient(90deg,#1976d2,#1e88e5);color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;}
-    .cb-title{display:flex;align-items:center;gap:8px;font-weight:700}
-    .cb-title i{opacity:.9}
-    .cb-close{background:transparent;border:none;color:#fff;font-size:16px;cursor:pointer}
-    .cb-body{padding:10px;height:100%;overflow:auto;display:flex;flex-direction:column;gap:8px;background:#f8fbff}
-    .cb-msg{max-width:85%;padding:8px 10px;border-radius:12px;line-height:1.5;font-size:14px;white-space:pre-wrap}
-    .cb-msg.user{align-self:flex-end;background:#e3f2fd;border-top-left-radius:4px}
-    .cb-msg.bot{align-self:flex-start;background:#ffffff;border:1px solid #ecf2ff;border-top-right-radius:4px}
-    .cb-input{padding:8px;border-top:1px solid #e6eefc;background:#fff;display:flex;gap:8px;align-items:flex-end}
-    .cb-input textarea{flex:1;resize:none;min-height:40px;max-height:120px;padding:8px;border:2px solid #e6eefc;border-radius:10px;font-size:14px;direction:rtl}
-    .cb-send{padding:9px 12px;background:#1976d2;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer}
-    .cb-send:disabled{opacity:.6;cursor:not-allowed}
-    .cb-typing{align-self:flex-start;color:#888;font-size:12px;display:flex;align-items:center;gap:6px}
-    .cb-typing .dots{letter-spacing:2px;animation:blink 1.4s infinite}
-    @keyframes blink{0%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+body {
+  background: #f8fbff;
+  color: #2c3e50;
+  min-height: 100vh;
+}
 
-    /* 🗂️ تصميم نافذة عرض المرفقات */
-.file-viewer-modal {
-  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.6);justify-content:center;align-items:center;
-  z-index:3000;padding:20px;
+/* 🧭 الشريط العلوي */
+.navbar {
+  background: white;
+  padding: 18px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-.file-viewer-content {
-  background:white;border-radius:16px;padding:20px;max-width:800px;
-  width:100%;max-height:90vh;overflow:auto;position:relative;
-  box-shadow:0 10px 30px rgba(0,0,0,0.3);
-}
-.file-viewer-body {text-align:center;}
-.close-btn {
-  position:absolute;top:10px;left:15px;font-size:26px;
-  cursor:pointer;color:#444;transition:.2s;
-}
-.close-btn:hover {color:#e53935;}
-.view-file-btn {
-  background:#1976d2;color:white;border:none;padding:6px 12px;
-  border-radius:8px;font-weight:600;cursor:pointer;
-}
-.view-file-btn:hover {background:#1565c0;}
 
-/* 🎯 إصلاح نهائي للطبقات العائمة والأزرار */
-#newRequestModal,
-#fileViewerModal,
-#chatbotWidget {
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-box img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.logo-box h1 {
+  color: #1e88e5;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #34495e;
+  font-weight: 600;
+}
+
+.logout-btn {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.logout-btn:hover {
+  background: #bbdefb;
+}
+
+/* 📦 الحاوية والعناوين */
+.container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.page-title {
+  font-size: 26px;
+  color: #0d47a1;
+  font-weight: 700;
+}
+
+.section-title {
+  font-size: 22px;
+  color: #1e88e5;
+  margin: 30px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e3f2fd;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ➕ زر إضافة طلب جديد */
+.new-request-btn {
+  padding: 10px 20px;
+  background: linear-gradient(to right, #2196f3, #1976d2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.3s;
+}
+
+.new-request-btn:hover {
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+/* 📋 بطاقات الطلبات */
+.requests-grid {
+  display: grid;
+  gap: 22px;
+}
+
+.request-card {
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid #eef5ff;
+  transition: all 0.3s ease;
+}
+
+.request-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(30, 136, 229, 0.12);
+}
+
+/* 🟦 شريط الحالة */
+.status-header { height: 6px; }
+.status-new { background: #2196f3; }
+.status-in-progress { background: #ff9800; }
+.status-closed { background: #4caf50; }
+.status-rejected { background: #f44336; }
+
+/* 💬 محتوى البطاقة */
+.card-content { padding: 24px; }
+.request-title {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+.request-desc {
+  color: #555;
+  margin-bottom: 18px;
+  line-height: 1.6;
+  font-size: 15px;
+}
+.status-info {
+  background: #f9fbfd;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  color: #34495e;
+}
+.no-requests {
+  text-align: center;
+  padding: 30px;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* ✳️ توهج البطاقة أثناء التنفيذ */
+.card-glow {
+  border: 2px solid #81c784 !important;
+  box-shadow: 0 0 18px rgba(129, 199, 132, 0.6) !important;
+  transition: all 0.3s ease-in-out;
+}
+
+/* 📤 تصدير الطلبات والفلاتر */
+.export-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.export-btn {
+  background: #43a047;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.export-btn:hover { background: #388e3c; }
+
+#statusFilter {
+  border: 2px solid #e3f2fd;
+  border-radius: 10px;
+  padding: 10px;
+  background: white;
+  color: #0d47a1;
+  font-weight: 600;
+}
+
+#statusFilter:focus {
+  outline: none;
+  border-color: #1e88e5;
+  box-shadow: 0 0 8px rgba(30, 136, 229, 0.3);
+}
+
+/* 📥 نموذج رفع الطلب */
+.request-modal {
   display: none;
-  opacity: 0;
-  pointer-events: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
 
-/* ✅ تظهر الطبقات فقط وقت الفتح */
-#newRequestModal[style*="display: flex"],
-#fileViewerModal[style*="display: flex"],
-#chatbotWidget:not(.hidden) {
-  display: flex !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  z-index: 9999 !important;
+.request-modal-content {
+  background: #fff;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  position: relative;
+  text-align: right;
 }
 
-  </style>
+.form-group { margin-bottom: 20px; }
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e3f2fd;
+  border-radius: 12px;
+  font-size: 15px;
+  direction: rtl;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to right, #2196f3, #1976d2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(to right, #1e88e5, #1565c0);
+}
+
+/* 🗂️ نافذة عرض المرفقات */
+.file-viewer-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  padding: 20px;
+}
+
+.file-viewer-content {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.file-viewer-body { text-align: center; }
+
+.close-btn {
+  position: absolute;
+  top: 10px; left: 15px;
+  font-size: 26px;
+  cursor: pointer;
+  color: #444;
+  transition: 0.2s;
+}
+
+.close-btn:hover { color: #e53935; }
+
+/* 🎛️ الأزرار العامة */
+.save-btn,
+.view-file-btn {
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.save-btn {
+  padding: 8px 18px;
+  background: linear-gradient(90deg, #1565c0, #1e88e5, #42a5f5);
+  box-shadow: 0 3px 8px rgba(33, 150, 243, 0.25);
+}
+
+.save-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #1e88e5, #42a5f5);
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.3);
+}
+
+.view-file-btn {
+  padding: 6px 14px;
+  background: linear-gradient(90deg, #2196f3, #42a5f5);
+  box-shadow: 0 3px 6px rgba(33, 150, 243, 0.25);
+  border-radius: 8px;
+}
+
+.view-file-btn:hover {
+  background: linear-gradient(90deg, #1e88e5, #2196f3);
+  box-shadow: 0 5px 12px rgba(33, 150, 243, 0.35);
+}
+
+/* 📊 قائمة تغيير الحالة */
+.status-select {
+  border: 2px solid #e3f2fd;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: #f1f8ff;
+  color: #1565c0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.1);
+}
+
+.status-select:hover {
+  background: #e3f2fd;
+  box-shadow: 0 3px 10px rgba(25, 118, 210, 0.2);
+}
+
+/* ⏱️ المؤقت */
+.update-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.timer-text {
+  background: #f5f9ff;
+  color: #0d47a1;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(13, 71, 161, 0.1);
+}
+
+/* 🤖 الشات بوت */
+.chatbot-float-btn {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+  background: linear-gradient(135deg, #42a5f5, #1e88e5);
+  color: white;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(30, 136, 229, 0.3);
+  z-index: 1000;
+}
+
+.chatbot-widget {
+  position: fixed;
+  bottom: 100px;
+  left: 25px;
+  width: 350px;
+  max-height: 520px;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+  display: none;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.chatbot-widget.show { display: flex; }
+
+.cb-header {
+  background: linear-gradient(135deg, #2196f3, #1565c0);
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cb-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  background: #f8fbff;
+}
+
+.cb-msg {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  max-width: 80%;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.cb-msg.user {
+  background: #e3f2fd;
+  color: #0d47a1;
+  margin-left: auto;
+}
+
+.cb-msg.bot {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.cb-input {
+  display: flex;
+  border-top: 1px solid #e3f2fd;
+}
+
+.cb-input textarea {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  font-family: 'Tajawal';
+  font-size: 14px;
+  resize: none;
+}
+
+.cb-send {
+  background: #1e88e5;
+  color: white;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+</style>
+
 </head>
 <body>
 
@@ -403,9 +760,7 @@ function normalizeDepartmentJS(name) {
 }
 
 /* ========== تحميل الطلبات ========== */
-// ✅ تحميل الطلبات بعد التعديل
-/* ========== تحميل الطلبات (بضمان التكرار التلقائي عند الفشل الأول) ========== */
-/* ========== تحميل الطلبات (فلترة مطابقة للنسخة القديمة) ========== */
+
 async function loadRequestsForUser(dept) {
 console.log("📨 إرسال طلب إلى السيرفر للقسم:", dept);
 
@@ -445,8 +800,6 @@ console.log("📨 إرسال طلب إلى السيرفر للقسم:", dept);
     document.getElementById('incoming-requests').innerHTML = '<div class="error-message">حدث خطأ أثناء تحميل الطلبات</div>';
   }
 }
-
-
 
 /* ========== عرض الطلبات ========== */
 function renderRequests(containerId, list) {
@@ -496,10 +849,47 @@ function renderRequests(containerId, list) {
                  </button>
                </div>`
             : `<div class="meta-item"><i class="fas fa-paperclip"></i> لا يوجد مرفق</div>`}
+
+           <div class="update-section">
+  ${
+    // 👇 المستلم فقط يقدر يغير الحالة
+    normalizeArabicJS(req['القسم المستلم']) === normalizeArabicJS(currentUser.department)
+      ? `
+        <select class="status-select" onchange="updateRequestStatus('${req['رقم الطلب']}', this.value)">
+          <option value="">تغيير الحالة</option>
+          <option value="جديد">جديد</option>
+          <option value="قيد المراجعة">قيد المراجعة</option>
+          <option value="جاري التنفيذ">جاري التنفيذ</option>
+          <option value="معلق">معلق</option>
+          <option value="مغلق">مغلق</option>
+        </select>
+      `
+      : `
+        <select class="status-select" disabled>
+          <option value="">لا يمكن التعديل</option>
+        </select>
+      `
+  }
+  <span id="timer-${req['رقم الطلب']}" class="timer-text">${req['الوقت'] || '00:00:00'}</span>
+</div>
+
         </div>
       </div>`;
-  }).join('');
+    }).join('');
+
+  setTimeout(() => {
+    list.forEach(req => {
+      const status = (req['الحالة'] || '').trim();
+      const timeStr = (req['الوقت'] || '00:00:00').trim();
+      const [h, m, s] = timeStr.split(':').map(Number);
+      const totalSec = (h || 0) * 3600 + (m || 0) * 60 + (s || 0);
+
+      if (status === 'جاري التنفيذ') startTimer(req['رقم الطلب'], totalSec);
+      else if (status === 'معلق') pauseTimer(req['رقم الطلب']);
+    });
+   }, 300);
 }
+
 
 /* ========== ألوان الحالات ========== */
 function statusToClass(s) {
@@ -519,6 +909,106 @@ function filterRequestsByStatus() {
     card.style.display = (!status || text.includes(status)) ? 'block' : 'none';
   });
 }
+
+/* ========== دالة تحديث الحالة ========== */
+async function updateRequestStatus(reqId, newStatus) {
+  if (!newStatus) return;
+
+  const updater = currentUser.name;
+  const payload = { requestId: reqId, status: newStatus, updater };
+
+  // 🔹 تحكم في المؤقت حسب الحالة
+  if (newStatus === "جاري التنفيذ") {
+    startTimer(reqId);
+  }
+
+  if (newStatus === "معلق") {
+    pauseTimer(reqId); // توقف مؤقت
+  }
+
+  if (newStatus === "مغلق") {
+    const duration = stopTimer(reqId);
+    payload.duration = duration;
+  }
+
+  try {
+    const res = await fetch('/api/update_request_status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      showToast("تم تحديث الحالة بنجاح ✅", "success");
+      await loadRequests();
+    } else {
+      showToast("حدث خطأ أثناء التحديث ❌", "error");
+    }
+  } catch (e) {
+    console.error(e);
+    showToast("فشل الاتصال بالخادم", "error");
+  }
+}
+
+/* ========== نظام المؤقت ========== */
+let timers = {};
+let savedTimes = {}; // 🧠 لحفظ الوقت عند التوقف المؤقت
+
+function startTimer(reqId, baseSeconds = null) {
+  const el = document.getElementById(`timer-${reqId}`);
+  if (!el) return;
+
+  // ⏱️ إذا فيه وقت محفوظ نكمل منه، وإذا لا نبدأ من baseSeconds
+  let seconds = savedTimes[reqId] ?? baseSeconds ?? 0;
+
+  clearInterval(timers[reqId]);
+  timers[reqId] = setInterval(() => {
+    seconds++;
+    savedTimes[reqId] = seconds; // 🔹 نحفظ الوقت باستمرار
+    const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    el.textContent = `${h}:${m}:${s}`;
+
+    // 🎨 تغيير اللون حسب المدة
+    if (seconds < 300) el.style.background = '#e8f5e9'; // أخضر فاتح
+    else if (seconds < 1800) el.style.background = '#fff8e1'; // أصفر
+    else el.style.background = '#ffebee'; // أحمر فاتح
+  }, 1000);
+}
+
+function pauseTimer(reqId) {
+  if (timers[reqId]) {
+    clearInterval(timers[reqId]);
+    timers[reqId] = null;
+  }
+}
+
+function stopTimer(reqId) {
+  if (timers[reqId]) {
+    clearInterval(timers[reqId]);
+    delete timers[reqId];
+  }
+  const el = document.getElementById(`timer-${reqId}`);
+  const time = el ? el.textContent : "00:00:00";
+
+  // 🧹 حذف الوقت المحفوظ بعد الإغلاق
+  delete savedTimes[reqId];
+
+  return time;
+}
+
+
+/* ========== Toast بسيط للإشعارات ========== */
+function showToast(msg, type = "info") {
+  const toast = document.createElement("div");
+  toast.className = `toast show ${type}`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
 
 /* ========== إرسال طلب جديد ========== */
 document.getElementById('newRequestForm').addEventListener('submit', async (e) => {
