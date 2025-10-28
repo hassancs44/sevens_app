@@ -68,11 +68,55 @@ def normalize_columns(df):
 def load_users():
     try:
         df = pd.read_excel(DB_PATH)
-        df.columns = df.columns.str.strip().str.replace('\u200f','', regex=True).str.replace('\u200e','', regex=True)
-        rename_map = {'البريد الالكتروني':'البريد الإلكتروني','البريد الالكترونى':'البريد الإلكتروني','الايميل':'البريد الإلكتروني'}
-        df.rename(columns=rename_map, inplace=True)
-        df = normalize_department_names(df)
-        return normalize_columns(df)
+
+        # 🔹 تنظيف الأعمدة من أي رموز أو فراغات غريبة
+        df.columns = (
+            df.columns
+            .astype(str)
+            .str.replace('\u200f', '', regex=True)
+            .str.replace('\u200e', '', regex=True)
+            .str.replace(' ', '', regex=True)
+            .str.strip()
+        )
+
+        # ✅ توحيد أسماء الأعمدة مهما كانت كتابتها
+        rename_map = {
+            'الاسم': 'الاسم',
+            'الاسمالكامل': 'الاسم',
+            'الاسم_الكامل': 'الاسم',
+            'الا سم': 'الاسم',
+            'الإسم': 'الاسم',
+            'اسم': 'الاسم',
+
+            'البريدالإلكتروني': 'البريد الإلكتروني',
+            'البريدالالكتروني': 'البريد الإلكتروني',
+            'البريدالالكترونى': 'البريد الإلكتروني',
+            'الايميل': 'البريد الإلكتروني',
+            'email': 'البريد الإلكتروني',
+            'ايميل': 'البريد الإلكتروني',
+
+            'القسم': 'القسم',
+            'القسم_الموظف': 'القسم',
+            'ادارة': 'القسم',
+
+            'الصلاحيه': 'الصلاحية',
+            'الوظيفة': 'الصلاحية',
+            'role': 'الصلاحية'
+        }
+
+        # 🧩 إعادة التسمية بناءً على التطابق الجزئي (حتى لو ناقص حرف)
+        for col in list(df.columns):
+            normalized = re.sub(r'[إأآا]', 'ا', col).replace(' ', '').lower()
+            for k, v in rename_map.items():
+                if re.sub(r'[إأآا]', 'ا', k).replace(' ', '').lower() in normalized:
+                    df.rename(columns={col: v}, inplace=True)
+
+        # ✅ التأكد أن كل الأعمدة المهمة موجودة حتى لو ناقصة
+        for col in ['الاسم', 'البريد الإلكتروني', 'القسم', 'الصلاحية', 'كلمة المرور']:
+            if col not in df.columns:
+                df[col] = ''
+
+        return normalize_department_names(df)
     except Exception as e:
         print("❌ load_users error:", e)
         return pd.DataFrame()
@@ -149,38 +193,122 @@ def forgot_page(): return render_template('ForgotYourPassword.html')
 # ============== API: الدخول ==============
 @app.route('/api/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    email = (data.get('email','') or '').strip().lower()
-    password = (data.get('password','') or '').strip()
+    data = request.get_json() or {}
+    email = (data.get('email', '') or '').strip().lower()
+    password = (data.get('password', '') or '').strip()
 
     df = load_users()
     if df.empty:
         return jsonify({"success": False, "message": "قاعدة المستخدمين فارغة"}), 500
-    if 'البريد الإلكتروني' not in df.columns:
-        return jsonify({"success": False, "message": "عمود البريد الإلكتروني غير موجود في قاعدة البيانات"}), 500
 
-    df['البريد الإلكتروني'] = df['البريد الإلكتروني'].astype(str).str.lower().str.strip()
-    df['كلمة المرور'] = df['كلمة المرور'].astype(str).str.strip()
+    # ✅ البحث عن عمود البريد الإلكتروني حتى لو مكتوب بصيغة مختلفة
+    email_col = next((c for c in df.columns if 'بريد' in str(c) or 'email' in str(c) or 'ايميل' in str(c)), None)
+    pass_col  = next((c for c in df.columns if 'مرور' in str(c) or 'password' in str(c)), None)
+    role_col  = next((c for c in df.columns if 'صلاح' in str(c) or 'وظيف' in str(c) or 'role' in str(c)), None)
 
-    match = df[(df['البريد الإلكتروني']==email) & (df['كلمة المرور']==password)]
+    if not email_col or not pass_col:
+        return jsonify({"success": False, "message": "أعمدة البريد أو كلمة المرور غير موجودة في قاعدة البيانات"}), 500
+
+    # 🔹 تنظيف النصوص داخل الأعمدة
+    df[email_col] = df[email_col].astype(str).str.lower().str.strip()
+    df[pass_col]  = df[pass_col].astype(str).str.strip()
+
+    # 🔹 دالة مقارنة ذكية تتجاهل المسافات والاختلافات الطفيفة
+    def normalize_text(t):
+        return re.sub(r'\s+', '', str(t).strip().lower())
+
+    # ✅ البحث الذكي عن المستخدم
+    match = df[df.apply(
+        lambda row: normalize_text(row[email_col]) == normalize_text(email)
+        and normalize_text(row[pass_col]) == normalize_text(password),
+        axis=1
+    )]
+
     if match.empty:
         return jsonify({"success": False, "message": "البريد أو كلمة المرور غير صحيحة"}), 401
 
     user = match.iloc[0].to_dict()
-    role = str(user.get('الصلاحية','')).strip().replace('\u200f','').replace('\u200e','')
-    if role in ['مدير القسم','مدير أقسام','رئيس قسم']: role='مدير قسم'
-    elif role in ['موظف','موظفه','عامل']:             role='موظف'
-    elif role in ['مدير عام','الإدارة العامة']:        role='مدير عام'
 
-    # 🔹 إضافة حفظ الاسم والقسم في الرد النهائي
-    return jsonify({"success": True,"user":{
-        "email": str(user.get('البريد الإلكتروني','')).strip(),
-        "name": str(user.get('الاسم','')).strip(),
-        "role": role,
-        "department": str(user.get('القسم','')).strip()
-    }})
+    # ✅ معالجة الصلاحية
+    role = str(user.get(role_col or 'الصلاحية', '')).strip()
+    role = role.replace('\u200f', '').replace('\u200e', '')
+
+    if role in ['مدير القسم', 'مدير أقسام', 'رئيس قسم']:
+        role = 'مدير قسم'
+    elif role in ['موظف', 'موظفه', 'عامل']:
+        role = 'موظف'
+    elif role in ['مدير عام', 'الإدارة العامة']:
+        role = 'مدير عام'
+
+    # ✅ تحديد الاسم والقسم حتى لو كان بأسماء مختلفة
+    name_col = next((c for c in df.columns if 'اسم' in str(c)), 'الاسم')
+    dept_col = next((c for c in df.columns if 'قسم' in str(c)), 'القسم')
+
+    name_value = str(user.get(name_col, '')).strip()
+    dept_value = str(user.get(dept_col, '')).strip()
+
+    # 🧠 في حال الاسم فاضي، نستخرج الاسم من البريد
+    if not name_value:
+        name_value = email.split('@')[0] if '@' in email else email
+
+    return jsonify({
+        "success": True,
+        "user": {
+            "email": str(user.get(email_col, '')).strip(),
+            "name": name_value,
+            "role": role,
+            "department": dept_value
+        }
+    })
 
 
+# ============== API: جلب الموظفين لكل قسم ==============
+@app.route('/api/get_employees', methods=['POST'])
+def get_employees():
+    """
+    جلب الموظفين حسب القسم (مدير القسم فقط يرى موظفي قسمه)
+    إذا لم يُرسل قسم، يتم إرجاع كل الموظفين (للمدير العام)
+    """
+    try:
+        data = request.get_json() or {}
+        dept = (data.get('department', '') or '').strip()
+
+        df = load_users()
+        # ✅ تنظيف الأعمدة من الفراغات والهمزات
+        df.columns = df.columns.str.replace(' ', '', regex=True).str.replace('أ', 'ا').str.strip()
+        df.rename(columns={'الا سم': 'الاسم'}, inplace=True)
+
+        if df.empty:
+            return jsonify({"success": False, "message": "لا توجد بيانات مستخدمين"})
+
+        # 🧩 اكتشاف الأعمدة المرنة
+        name_col = next((c for c in df.columns if 'اسم' in str(c)), None)
+        role_col = next((c for c in df.columns if 'صلاح' in str(c)), None)
+        dept_col = next((c for c in df.columns if 'قسم' in str(c)), None)
+
+        if not all([name_col, role_col, dept_col]):
+            print("❌ الأعمدة غير مكتملة:", df.columns.tolist())
+            return jsonify({"success": False, "message": "الأعمدة غير مكتملة"}), 500
+
+        # ✅ توحيد الأسماء والأقسام
+        df['الاسم'] = df[name_col].astype(str).str.strip()
+        df['الصلاحية'] = df[role_col].astype(str).str.strip()
+        df['القسم'] = df[dept_col].astype(str).str.strip()
+
+        # ✅ إذا تم إرسال القسم من واجهة المدير → فلترة نفس القسم فقط
+        if dept:
+            dept_std = normalize_arabic(dept)
+            df = df[df['القسم'].apply(lambda x: normalize_arabic(x) == dept_std)]
+
+        # ✅ استبعاد المديرين العامين من القائمة (ما يتوكل لهم)
+        df = df[df['الصلاحية'].isin(['موظف', 'عامل', ''])]
+
+        employees = df[['الاسم', 'القسم']].dropna().to_dict(orient='records')
+        return jsonify({"success": True, "employees": employees})
+
+    except Exception as e:
+        print("❌ get_employees error:", e)
+        return jsonify({"success": False, "message": str(e)})
 
 
 # ============== API: الطلبات ==============
@@ -301,28 +429,74 @@ def update_request_status():
     idx_list = df.index[df['رقم الطلب'] == req_id].tolist()
     if not idx_list:
         return jsonify({"success": False}), 404
-
     idx = idx_list[0]
 
-    # 🔹 تحديث الحالة العامة واسم آخر من غيّرها
-    if 'الحالة' in df.columns: df.at[idx, 'الحالة'] = new_status
-    if 'آخر تحديث بواسطة' in df.columns: df.at[idx, 'آخر تحديث بواسطة'] = updater
+    # ✅ ضمان أن الأعمدة النصية هي من نوع str لتفادي تحذير pandas
+    text_cols = ['اسم المستلم', 'بدأ التنفيذ بواسطة', 'أغلق بواسطة', 'آخر تحديث بواسطة', 'الوقت']
+    for col in text_cols:
+        if col in df.columns:
+            df[col] = df[col].astype(str)
 
-    # 🔹 تسجيل من بدأ التنفيذ أو أغلق الطلب
+    # 🔹 تحديث الحالة والاسم
+    df.at[idx, 'الحالة'] = new_status
+    df.at[idx, 'آخر تحديث بواسطة'] = updater
+
+    # 🔹 تعيين اسم المستلم فقط إذا لم يكن موجود سابقًا
+    if not df.at[idx, 'اسم المستلم']:
+        df.at[idx, 'اسم المستلم'] = updater
+
     if new_status == 'جاري التنفيذ':
         df.at[idx, 'بدأ التنفيذ بواسطة'] = updater
-    if 'اسم المستلم' in df.columns:
-        df.at[idx, 'اسم المستلم'] = updater  # ✅ يحفظ اسم المستلم
+        df.at[idx, 'وقت البداية'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    elif new_status == 'معلق':
+        df.at[idx, 'وقت التوقف المؤقت'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
     elif new_status == 'مغلق':
+        if 'وقت البداية' in df.columns:
+            start_str = df.at[idx, 'وقت البداية']
+            if start_str:
+                start_time = datetime.strptime(start_str, '%Y-%m-%d %H:%M:%S')
+                diff = datetime.now() - start_time
+                df.at[idx, 'الوقت'] = str(diff).split('.')[0]
+        if duration:
+            df.at[idx, 'الوقت'] = duration
         df.at[idx, 'أغلق بواسطة'] = updater
 
-    if duration:
-        if 'الوقت' not in df.columns:
-            df['الوقت'] = ''
-        df.at[idx, 'الوقت'] = duration
+    if new_status == 'معلق':
+        # حفظ وقت الإيقاف المؤقت فقط
+        if 'وقت البداية' in df.columns:
+            start_str = df.at[idx, 'وقت البداية']
+            if start_str:
+                start_time = datetime.strptime(start_str, '%Y-%m-%d %H:%M:%S')
+                diff = datetime.now() - start_time
+                df.at[idx, 'الوقت'] = str(diff).split('.')[0]
 
     save_requests(df)
     return jsonify({"success": True})
+
+
+@app.route('/api/delegate_request', methods=['POST'])
+def delegate_request():
+    data = request.get_json()
+    req_id = data.get('requestId')
+    delegate = data.get('delegate')
+    delegated_by = data.get('delegatedBy')
+
+    df = load_requests()
+    if df.empty:
+        return jsonify({'success': False, 'message': 'قاعدة الطلبات فارغة'})
+
+    mask = df['رقم الطلب'] == req_id
+    if not mask.any():
+        return jsonify({'success': False, 'message': 'الطلب غير موجود'})
+
+    df.loc[mask, 'اسم المستلم'] = delegate
+    df.loc[mask, 'آخر تحديث بواسطة'] = delegated_by
+    df.loc[mask, 'الحالة'] = 'موكل'
+    save_requests(df)
+
+    return jsonify({'success': True})
 
 
 # ============== API: تصدير الطلبات ==============
