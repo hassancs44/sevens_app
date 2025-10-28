@@ -266,44 +266,33 @@ def login():
 @app.route('/api/get_employees', methods=['POST'])
 def get_employees():
     """
-    جلب الموظفين حسب القسم (مدير القسم فقط يرى موظفي قسمه)
-    إذا لم يُرسل قسم، يتم إرجاع كل الموظفين (للمدير العام)
+    جلب الموظفين بناءً على المدير (كل الموظفين التابعين له بغض النظر عن القسم)
     """
     try:
         data = request.get_json() or {}
+        manager_name = (data.get('manager_name', '') or '').strip()
         dept = (data.get('department', '') or '').strip()
 
         df = load_users()
-        # ✅ تنظيف الأعمدة من الفراغات والهمزات
-        df.columns = df.columns.str.replace(' ', '', regex=True).str.replace('أ', 'ا').str.strip()
-        df.rename(columns={'الا سم': 'الاسم'}, inplace=True)
-
         if df.empty:
             return jsonify({"success": False, "message": "لا توجد بيانات مستخدمين"})
 
-        # 🧩 اكتشاف الأعمدة المرنة
-        name_col = next((c for c in df.columns if 'اسم' in str(c)), None)
-        role_col = next((c for c in df.columns if 'صلاح' in str(c)), None)
-        dept_col = next((c for c in df.columns if 'قسم' in str(c)), None)
+        # 🔹 اكتشاف الأعمدة الأساسية
+        name_col = next((c for c in df.columns if 'اسم' in str(c)), 'الاسم')
+        role_col = next((c for c in df.columns if 'صلاح' in str(c)), 'الصلاحية')
+        dept_col = next((c for c in df.columns if 'قسم' in str(c)), 'القسم')
 
-        if not all([name_col, role_col, dept_col]):
-            print("❌ الأعمدة غير مكتملة:", df.columns.tolist())
-            return jsonify({"success": False, "message": "الأعمدة غير مكتملة"}), 500
-
-        # ✅ توحيد الأسماء والأقسام
         df['الاسم'] = df[name_col].astype(str).str.strip()
         df['الصلاحية'] = df[role_col].astype(str).str.strip()
         df['القسم'] = df[dept_col].astype(str).str.strip()
 
-        # ✅ إذا تم إرسال القسم من واجهة المدير → فلترة نفس القسم فقط
-        if dept:
-            dept_std = normalize_arabic(dept)
-            df = df[df['القسم'].apply(lambda x: normalize_arabic(x) == dept_std)]
+        # ✅ المنطق الجديد:
+        # إذا المستخدم مدير قسم → يشوف كل الموظفين اللي صلاحيتهم "موظف"
+        if manager_name:
+            df = df[df['الصلاحية'].isin(['موظف', 'عامل'])]
 
-        # ✅ استبعاد المديرين العامين من القائمة (ما يتوكل لهم)
-        df = df[df['الصلاحية'].isin(['موظف', 'عامل', ''])]
-
-        employees = df[['الاسم', 'القسم']].dropna().to_dict(orient='records')
+        # ✅ المدير العام يشوف الكل
+        employees = df[['الاسم', 'القسم', 'الصلاحية']].dropna().to_dict(orient='records')
         return jsonify({"success": True, "employees": employees})
 
     except Exception as e:
@@ -478,25 +467,33 @@ def update_request_status():
 
 @app.route('/api/delegate_request', methods=['POST'])
 def delegate_request():
-    data = request.get_json()
-    req_id = data.get('requestId')
-    delegate = data.get('delegate')
-    delegated_by = data.get('delegatedBy')
+    data = request.get_json() or {}
+
+    # ✅ يدعم كل أنواع المفاتيح (camelCase أو snake_case)
+    req_id = data.get('requestId') or data.get('request_id')
+    delegate = data.get('delegate') or data.get('delegateName')
+    delegated_by = data.get('delegatedBy') or data.get('delegated_by')
+
+    if not req_id or not delegate:
+        return jsonify({'success': False, 'message': 'بيانات غير مكتملة (رقم الطلب أو اسم الموظف مفقود)'})
 
     df = load_requests()
-    if df.empty:
+    if df.empty or 'رقم الطلب' not in df.columns:
         return jsonify({'success': False, 'message': 'قاعدة الطلبات فارغة'})
 
     mask = df['رقم الطلب'] == req_id
     if not mask.any():
-        return jsonify({'success': False, 'message': 'الطلب غير موجود'})
+        return jsonify({'success': False, 'message': f'الطلب {req_id} غير موجود'})
 
+    # ✅ تحديث الحقول
     df.loc[mask, 'اسم المستلم'] = delegate
     df.loc[mask, 'آخر تحديث بواسطة'] = delegated_by
     df.loc[mask, 'الحالة'] = 'موكل'
-    save_requests(df)
 
+    save_requests(df)
+    print(f"✅ تم توكيل الطلب {req_id} إلى {delegate} بواسطة {delegated_by}")
     return jsonify({'success': True})
+
 
 
 # ============== API: تصدير الطلبات ==============
