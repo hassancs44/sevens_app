@@ -408,7 +408,12 @@ window.onload = async () => {
 
   // 🧩 تحميل قائمة الموظفين من السيرفر
   try {
-    const res = await fetch('/api/get_employees');
+    const res = await fetch('/api/get_employees', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ manager_name: currentUser.name, department: currentUser.department })
+});
+
     const data = await res.json();
     if (data.success) {
       allEmployees = data.employees;
