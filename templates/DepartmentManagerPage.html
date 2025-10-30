@@ -1097,16 +1097,31 @@ window.addEventListener('click', (e) => {
 
 // ✅ فلترة الطلبات حسب القسم والحالة
 function filterRequests() {
-  const status = document.getElementById('statusFilter').value.trim();
-  const dept = document.getElementById('deptSelectedText').textContent.trim();
-  const allCards = document.querySelectorAll('.request-card');
+  const status = document.getElementById("statusFilter").value.trim();
+  const dept = document.getElementById("deptSelectedText").textContent.trim();
+  const allCards = document.querySelectorAll(".request-card");
 
   allCards.forEach(card => {
-    const text = card.innerText || '';
+    const text = card.innerText || "";
+
+    // تحقق من القسم والحالة
     const matchStatus = !status || text.includes(status);
-    const matchDept = dept === "جميع الأقسام" || text.includes(dept);
-    card.style.display = (matchStatus && matchDept) ? 'block' : 'none';
+    const matchDept = 
+      dept === "جميع الأقسام" || 
+      text.includes(dept) || 
+      text.includes(normalizeArabicJS(dept)); // لدعم اختلافات الهمزات مثلاً
+
+    // عرض فقط إذا كان القسم المرسل أو المستلم يطابق القسم المحدد
+    card.style.display = (matchStatus && matchDept) ? "block" : "none";
   });
+
+  // ✅ إذا كان المستخدم اختار قسم معين نغيّر عنوان الصفحة
+  const pageTitle = document.getElementById("pageTitle");
+  if (dept === "جميع الأقسام") {
+    pageTitle.textContent = `طلبات الأقسام الأخرى`;
+  } else {
+    pageTitle.textContent = `طلبات قسم ${dept}`;
+  }
 }
 
 
