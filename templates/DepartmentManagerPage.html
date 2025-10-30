@@ -1058,8 +1058,17 @@ const departments = [
   "قسم الخدمات - فني صيانة"
 ];
 
-// ✅ تعبئة القائمة تلقائياً
+// ✅ تعبئة القائمة تلقائياً مع خيار "جميع الأقسام"
 const deptContainer = document.getElementById('deptOptions');
+
+// أول خيار: جميع الأقسام
+const allOption = document.createElement('div');
+allOption.className = 'dropdown-item all-depts';
+allOption.textContent = " جميع الأقسام";
+allOption.onclick = () => selectDept("جميع الأقسام");
+deptContainer.appendChild(allOption);
+
+// بعده نضيف باقي الأقسام
 departments.forEach(dep => {
   const div = document.createElement('div');
   div.className = 'dropdown-item';
@@ -1087,6 +1096,9 @@ function filterDeptList() {
   items.forEach(i => {
     i.style.display = i.textContent.toLowerCase().includes(input) ? "block" : "none";
   });
+
+  // نضمن أن خيار جميع الأقسام يبقى ظاهر دائمًا
+  document.querySelector(".all-depts").style.display = "block";
 }
 
 // 🔹 إغلاق القائمة عند النقر خارجها
@@ -1095,33 +1107,37 @@ window.addEventListener('click', (e) => {
   if (!dropdown.contains(e.target)) dropdown.classList.remove('active');
 });
 
-// ✅ فلترة الطلبات حسب القسم والحالة
+/* ✅ فلترة الطلبات بحيث تظهر الصادرة والواردة معًا + إمكانية العودة لجميع الأقسام */
 function filterRequests() {
   const status = document.getElementById("statusFilter").value.trim();
   const dept = document.getElementById("deptSelectedText").textContent.trim();
   const allCards = document.querySelectorAll(".request-card");
 
+  // 🟦 إذا المستخدم اختار "جميع الأقسام" → نعرض كل الطلبات
+  if (dept === "جميع الأقسام" || !dept) {
+    allCards.forEach(card => {
+      const text = card.innerText || "";
+      const matchStatus = !status || text.includes(status);
+      card.style.display = matchStatus ? "block" : "none";
+    });
+    document.getElementById("pageTitle").textContent = `طلبات الأقسام الأخرى`;
+    return;
+  }
+
+  // 🔹 توحيد النصوص لتجنب اختلاف الهمزات والمسافات
+  const normalizedDept = normalizeArabicJS(dept);
   allCards.forEach(card => {
-    const text = card.innerText || "";
-
-    // تحقق من القسم والحالة
+    const text = normalizeArabicJS(card.innerText || "");
+    const matchDept =
+      text.includes(normalizedDept) || text.includes(dept.replace(/\s/g, ""));
     const matchStatus = !status || text.includes(status);
-    const matchDept = 
-      dept === "جميع الأقسام" || 
-      text.includes(dept) || 
-      text.includes(normalizeArabicJS(dept)); // لدعم اختلافات الهمزات مثلاً
 
-    // عرض فقط إذا كان القسم المرسل أو المستلم يطابق القسم المحدد
-    card.style.display = (matchStatus && matchDept) ? "block" : "none";
+    // ✅ نعرض الطلب فقط إذا كان القسم المرسل أو المستلم يطابق القسم المحدد
+    card.style.display = (matchDept && matchStatus) ? "block" : "none";
   });
 
-  // ✅ إذا كان المستخدم اختار قسم معين نغيّر عنوان الصفحة
-  const pageTitle = document.getElementById("pageTitle");
-  if (dept === "جميع الأقسام") {
-    pageTitle.textContent = `طلبات الأقسام الأخرى`;
-  } else {
-    pageTitle.textContent = `طلبات قسم ${dept}`;
-  }
+  // 📝 تحديث العنوان في الأعلى
+  document.getElementById("pageTitle").textContent = `طلبات قسم ${dept}`;
 }
 
 
