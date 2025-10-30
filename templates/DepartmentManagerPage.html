@@ -198,6 +198,88 @@
   border: 1px solid #c8e6c9;
 }
 
+    /* 🩵 تصميم القائمة المنسدلة الاحترافية */
+.custom-dropdown {
+  position: relative;
+  width: 220px;
+  font-family: 'Tajawal';
+}
+
+.dropdown-selected {
+  background: white;
+  border: 2px solid #e3f2fd;
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #0d47a1;
+  cursor: pointer;
+  transition: 0.25s;
+  box-shadow: 0 2px 6px rgba(33,150,243,0.05);
+}
+
+.dropdown-selected:hover {
+  box-shadow: 0 4px 10px rgba(33,150,243,0.15);
+}
+
+.dropdown-selected i {
+  font-size: 14px;
+  color: #1565c0;
+  transition: transform 0.3s ease;
+}
+
+.custom-dropdown.active .dropdown-selected i {
+  transform: rotate(180deg);
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  background: white;
+  border: 2px solid #e3f2fd;
+  border-radius: 10px;
+  margin-top: 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  display: none;
+  flex-direction: column;
+  z-index: 999;
+  max-height: 250px;
+  overflow: hidden;
+}
+
+.custom-dropdown.active .dropdown-list {
+  display: flex;
+}
+
+.dropdown-list input {
+  border: none;
+  border-bottom: 1px solid #e3f2fd;
+  padding: 8px 10px;
+  outline: none;
+  font-size: 14px;
+  color: #1565c0;
+}
+
+.dropdown-list div {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  padding: 10px 12px;
+  transition: 0.2s;
+  cursor: pointer;
+  color: #2c3e50;
+}
+
+.dropdown-item:hover {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
 
   </style>
 </head>
@@ -228,7 +310,16 @@
           <option value="مغلق">مغلق</option>
           <option value="مرفوض">مرفوض</option>
         </select>
-
+<div class="custom-dropdown" id="deptDropdown">
+    <div class="dropdown-selected" onclick="toggleDeptDropdown()">
+      <span id="deptSelectedText">جميع الأقسام</span>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="dropdown-list" id="deptList">
+      <input type="text" id="deptSearch" placeholder="ابحث عن قسم..." onkeyup="filterDeptList()"/>
+      <div id="deptOptions"></div>
+    </div>
+  </div>
         <button class="export-btn" style="background:#1e88e5" onclick="loadRequests()">
           <i class="fas fa-sync-alt"></i> تحديث
         </button>
@@ -933,6 +1024,91 @@ async function delegateRequest(reqId, delegateName) {
     showToast("فشل الاتصال بالخادم", "error");
   }
 }
+
+ // 🧠 جميع الأقسام (تلقائياً من البيانات اللي عندك)
+const departments = [
+  "الإدارة العامة",
+  "الإدارة الإدارية",
+  "الإدارة المالية",
+  "إدارة المراجعة",
+  "تحليل البيانات",
+  "الموارد البشرية",
+  "إدارة التقنية والشبكات",
+  "إدارة التسويق",
+  "إدارة التشغيل",
+  "مكتب التأجير",
+  "إدارة الصيانة وقطع الغيار",
+  "قسم مخزون السيارات",
+  "قسم استقبال عملاء الصيانة",
+  "قسم خدمة عملاء الصيانة",
+  "إدارة المبيعات",
+  "قسم مبيعات الصالة المدينة المنورة",
+  "قسم مبيعات الصالة الرياض 1",
+  "قسم مبيعات الصالة الرياض 2",
+  "قسم المبيعات الهاتفية",
+  "قسم المبيعات الهاتفية الرياض",
+  "قسم مبيعات الصالة - جده",
+  "قسم النظافة والاستقبال المدينة",
+  "قسم النظافة والاستقبال الرياض 1",
+  "قسم النظافة والاستقبال الرياض 2",
+  "قسم النظافة والاستقبال الرياض",
+  "قسم النظافة والاستقبال جده",
+  "قسم الاستقبال والنظافة",
+  "قسم المشتريات",
+  "قسم الخدمات - فني صيانة"
+];
+
+// ✅ تعبئة القائمة تلقائياً
+const deptContainer = document.getElementById('deptOptions');
+departments.forEach(dep => {
+  const div = document.createElement('div');
+  div.className = 'dropdown-item';
+  div.textContent = dep;
+  div.onclick = () => selectDept(dep);
+  deptContainer.appendChild(div);
+});
+
+// 🔹 فتح/إغلاق القائمة
+function toggleDeptDropdown() {
+  document.getElementById('deptDropdown').classList.toggle('active');
+}
+
+// 🔹 اختيار قسم
+function selectDept(name) {
+  document.getElementById('deptSelectedText').textContent = name || "جميع الأقسام";
+  document.getElementById('deptDropdown').classList.remove('active');
+  filterRequests();
+}
+
+// 🔹 بحث داخل القائمة
+function filterDeptList() {
+  const input = document.getElementById("deptSearch").value.toLowerCase();
+  const items = document.querySelectorAll(".dropdown-item");
+  items.forEach(i => {
+    i.style.display = i.textContent.toLowerCase().includes(input) ? "block" : "none";
+  });
+}
+
+// 🔹 إغلاق القائمة عند النقر خارجها
+window.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('deptDropdown');
+  if (!dropdown.contains(e.target)) dropdown.classList.remove('active');
+});
+
+// ✅ فلترة الطلبات حسب القسم والحالة
+function filterRequests() {
+  const status = document.getElementById('statusFilter').value.trim();
+  const dept = document.getElementById('deptSelectedText').textContent.trim();
+  const allCards = document.querySelectorAll('.request-card');
+
+  allCards.forEach(card => {
+    const text = card.innerText || '';
+    const matchStatus = !status || text.includes(status);
+    const matchDept = dept === "جميع الأقسام" || text.includes(dept);
+    card.style.display = (matchStatus && matchDept) ? 'block' : 'none';
+  });
+}
+
 
 </script>
 
