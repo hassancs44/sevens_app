@@ -90,6 +90,45 @@
   pointer-events: auto;
 }
 
+    /* 🎨 تصميم فلتر القسم مع البحث */
+.searchable-select {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  background: white;
+  border: 2px solid #e3f2fd;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.searchable-select input {
+  border: none;
+  border-bottom: 1px solid #e3f2fd;
+  padding: 8px 10px;
+  outline: none;
+  font-family: 'Tajawal';
+  font-size: 14px;
+}
+
+.searchable-select select {
+  border: none;
+  outline: none;
+  padding: 5px;
+  height: 150px;
+  overflow-y: auto;
+  font-family: 'Tajawal';
+  background: white;
+}
+
+.searchable-select select option {
+  padding: 6px 10px;
+}
+
+.searchable-select select option:hover {
+  background: #e3f2fd;
+}
+
   </style>
 </head>
 <body>
