@@ -1,7 +1,4 @@
-Flask
+flask
 pandas
 openpyxl
-requests
 gunicorn
-Flask-Cors
-
