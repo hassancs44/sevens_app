@@ -10,11 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
-    /* =========================================================
-🎨 تصميم لوحة SEVENS – النسخة المنظمة بالكامل
-========================================================= */
-
-/* 🎨 التنسيقات الأساسية */
+  
 * {
   margin: 0;
   padding: 0;
@@ -28,7 +24,6 @@ body {
   min-height: 100vh;
 }
 
-/* ===== الشريط العلوي (Navbar) ===== */
 .navbar {
   background: white;
   padding: 18px 30px;
@@ -81,14 +76,12 @@ body {
   background: #bbdefb;
 }
 
-/* ===== الحاوية العامة ===== */
 .container {
   max-width: 1100px;
   margin: 30px auto;
   padding: 0 20px;
 }
 
-/* ===== رؤوس الصفحات ===== */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -115,7 +108,6 @@ body {
   gap: 10px;
 }
 
-/* ===== زر رفع طلب جديد ===== */
 .new-request-btn {
   padding: 10px 20px;
   background: linear-gradient(to right, #2196f3, #1976d2);
@@ -132,11 +124,9 @@ body {
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
-/* ===== بطاقات الطلبات ===== */
-/* ===== بطاقات الطلبات (نفس شكل الموظف) ===== */
 .requests-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 👈 مربعة ومتناسقة */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
   gap: 22px;
   justify-content: center;
 }
@@ -148,7 +138,7 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   text-align: right;
-  aspect-ratio: 1 / 1;           /* 👈 مربع تمامًا */
+  aspect-ratio: 1 / 1; 
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -160,7 +150,6 @@ body {
   box-shadow: 0 8px 20px rgba(30, 136, 229, 0.18);
 }
 
-/* ===== العنوان والوصف ===== */
 .request-title {
   font-size: 17px;
   font-weight: 700;
@@ -181,7 +170,6 @@ body {
   margin-bottom: 10px;
 }
 
-/* ===== معلومات الحالة ===== */
 .status-info {
   font-size: 13px;
   font-weight: 600;
@@ -194,7 +182,6 @@ body {
   border-radius: 10px;
 }
 
-/* ===== زر عرض المرفق ===== */
 .view-file-btn {
   padding: 7px 14px;
   border-radius: 10px;
@@ -212,15 +199,12 @@ body {
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.25);
 }
 
-
-/* ===== ألوان الحالات ===== */
 .status-header { height: 6px; }
 .status-new { background: #2196f3; }
 .status-in-progress { background: #ff9800; }
 .status-closed { background: #4caf50; }
 .status-rejected { background: #f44336; }
 
-/* ===== محتوى البطاقة ===== */
 .card-content {
   padding: 24px;
 }
@@ -255,7 +239,6 @@ body {
   font-style: italic;
 }
 
-/* ===== التصدير ===== */
 .export-section {
   display: flex;
   align-items: center;
@@ -276,7 +259,6 @@ body {
   background: #388e3c;
 }
 
-/* ===== فلتر الحالة ===== */
 #statusFilter {
   border: 2px solid #e3f2fd;
   border-radius: 10px;
@@ -291,14 +273,12 @@ body {
   box-shadow: 0 0 8px rgba(30, 136, 229, 0.3);
 }
 
-/* ✳️ توهج البطاقة أثناء التنفيذ */
 .card-glow {
   border: 2px solid #81c784 !important;
   box-shadow: 0 0 18px rgba(129, 199, 132, 0.6) !important;
   transition: all .3s ease-in-out;
 }
 
-/* 🤖 الشات بوت */
 .chatbot-float-btn {
   position: fixed;
   bottom: 25px;
@@ -388,8 +368,7 @@ body {
   padding: 0 16px;
   cursor: pointer;
 }
-
-/* ✅ نموذج رفع الطلب (منبثق في المنتصف) */
+    
 .request-modal {
   display: none;
   position: fixed;
@@ -438,7 +417,6 @@ body {
   background: linear-gradient(to right, #1e88e5, #1565c0);
 }
 
-/* 🗂️ تصميم نافذة عرض المرفقات */
 .file-viewer-modal {
   display: none;
   position: fixed;
@@ -491,7 +469,6 @@ body {
   background: #1565c0;
 }
 
-/* ✅ إصلاح مشكلة الأزرار غير القابلة للنقر */
 .chatbot-widget.hidden,
 .file-viewer-modal:not([style*="display: flex"]) {
   pointer-events: none !important;
@@ -505,7 +482,6 @@ body {
   pointer-events: auto;
 }
 
-/* ===== ضبط القسم السفلي (الوقت + الحالة) ===== */
 .update-section {
   display: flex;
   justify-content: flex-start;
@@ -531,7 +507,6 @@ body {
   border-color: #90caf9;
 }
 
-/* المؤقت */
 .timer-text {
   display: inline-block;
   min-width: 70px;
@@ -545,7 +520,6 @@ body {
   border: 1px solid #c8e6c9;
 }
 
-/* 🩵 القائمة المنسدلة الاحترافية */
 .custom-dropdown {
   position: relative;
   width: 220px;
@@ -669,7 +643,6 @@ body {
   cursor: pointer;
 }
 
-    /* 💬 تصميم احترافي للرسائل */
 .chat-msg {
   margin-bottom: 12px;
   padding: 10px 14px;
@@ -719,7 +692,7 @@ body {
 </head>
 
 <body>
-  <!-- 🔹 الشريط العلوي -->
+ 
   <nav class="navbar">
     <div class="logo-box">
       <img src="{{ url_for('static', filename='7s.jpg') }}" alt="شعار SEVENS">
@@ -731,7 +704,6 @@ body {
     </div>
   </nav>
 
-  <!-- 🔹 المحتوى -->
   <div class="container">
     <div class="page-header">
       <h2 class="page-title" id="pageTitle">لوحة مدير القسم</h2>
@@ -772,7 +744,6 @@ body {
     <div class="requests-grid" id="outgoing-requests"><div class="no-requests">جارٍ التحميل...</div></div>
   </div>
 
-  <!-- 🔹 نموذج رفع طلب -->
   <div class="request-modal" id="newRequestModal">
     <div class="request-modal-content">
       <h3>رفع طلب جديد</h3>
@@ -790,7 +761,6 @@ body {
         <select id="targetDept" class="form-control" required>
           <option value="">اختر القسم</option>
 
-          <!-- 🏢 الإدارات الرئيسية -->
           <optgroup label="الإدارات الرئيسية">
             <option value="الإدارة العامة">الإدارة العامة</option>
             <option value="الإدارة الإدارية">الإدارة الإدارية</option>
@@ -856,11 +826,9 @@ body {
     </div>
   </div>
 
-  <!-- 🤖 زر الشات -->
   <div class="chatbot-float-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
 
 
-<!-- نافذة الشات -->
 <div id="chatbotWidget" class="chatbot-widget hidden" aria-live="polite">
   <div class="cb-header">
     <div class="cb-title"><i class="fas fa-robot"></i> مساعد SEVENS</div>
@@ -875,7 +843,6 @@ body {
   </div>
 </div>
 
-      <!-- 🗨️ نافذة تفاصيل الطلب والدردشة -->
 <div id="ticketDetailsModal" class="file-viewer-modal" onclick="closeTicketDetails(event)">
   <div class="file-viewer-content" style="max-width:900px;">
     <span class="close-btn" onclick="closeTicketDetails(event)">&times;</span>
@@ -883,7 +850,6 @@ body {
       <h3 id="ticketTitle">تفاصيل الطلب</h3>
       <div id="ticketInfo"></div>
 
-      <!-- 💬 قسم الدردشة والملاحظات -->
       <div id="chatSection" style="margin-top:25px;">
         <h4 style="color:#1565c0;margin-bottom:12px;"><i class="fas fa-comments"></i> الدردشة والملاحظات</h4>
 
@@ -914,7 +880,6 @@ body {
     </div>
   </div>
 </div>
-<!-- 🗂️ نافذة عرض المرفقات -->
 <div id="fileViewerModal" class="file-viewer-modal" onclick="closeFileViewer(event)">
   <div class="file-viewer-content">
     <span class="close-btn" onclick="closeFileViewer(event)">&times;</span>
@@ -922,9 +887,7 @@ body {
   </div>
 </div>
 
-  <!-- 🔹 السكربت -->
 <script>
-/* ========== دالة توحيد النص العربي ========== */
 function normalizeArabicJS(t){
   t = (t || '').toString().trim();
   t = t.replace(/[إأآا]/g, 'ا');
@@ -935,14 +898,12 @@ function normalizeArabicJS(t){
   return t;
 }
 
-/* ========== تعريف المستخدم الحالي ========== */
 let currentUser = null;
 let chatHistory = [];
 let activeTimers = {};
 let allEmployees = [];
 
-/* ========== دالة إضافة رسالة في واجهة الشات ========== */
-/* 🔹 تعريف الدالة قبل الاستدعاء */
+
 function appendMsg(sender, text) {
   const cbBody = document.getElementById("cbBody");
   if (!cbBody) return;
@@ -953,7 +914,6 @@ function appendMsg(sender, text) {
   cbBody.scrollTop = cbBody.scrollHeight;
 }
 
-/* 🔹 عند تحميل الصفحة */
 window.onload = async () => {
   console.log("🚀 بدء تشغيل الصفحة...");
   let userData = null;
@@ -971,10 +931,10 @@ window.onload = async () => {
   document.getElementById("pageTitle").textContent =
     `لوحة قسم ${currentUser.department}`;
 
-  // ✅ السطر الصحيح هنا
+  
   appendMsg("bot", "مرحباً! أنا مساعد SEVENS، اسألني أي شيء بخصوص الطلبات 🤖");
 
-  // 🧩 تحميل قائمة الموظفين من السيرفر
+ 
   try {
     const res = await fetch('/api/get_employees', {
   method: 'POST',
@@ -1002,7 +962,6 @@ function loadRequests() {
   loadRequestsForUser(currentUser.department);
 }
 
-/* ========== 🔄 تحديث الطلبات فقط كل 30 ثانية ========== */
 setInterval(async () => {
   const modal = document.getElementById('newRequestModal');
   const isModalOpen = modal && modal.style.display === 'flex';
@@ -1025,12 +984,10 @@ setInterval(async () => {
     const data = await res.json();
     console.log("✅ تحديث الطلبات:", data.length);
 
-    // 🔹 فصل الطلبات إلى واردة وصادرة فقط
     const deptStd = normalizeArabicJS(currentUser.department);
     const incoming = data.filter(r => normalizeArabicJS(r['القسم المستلم']).includes(deptStd));
     const outgoing = data.filter(r => normalizeArabicJS(r['القسم المرسل']).includes(deptStd));
 
-    // 🔹 تحديث القائمتين فقط
     renderRequests('incoming-requests', incoming);
     renderRequests('outgoing-requests', outgoing);
 
@@ -1040,8 +997,6 @@ setInterval(async () => {
   }
 }, 30000);
 
-
-/* ========== 🧩 دالة توحيد جميع الأقسام الموجودة بالإكسل ========== */
 function normalizeDepartmentJS(name) {
   if (!name) return '';
   let n = normalizeArabicJS(name).toLowerCase();
@@ -1101,12 +1056,10 @@ function normalizeDepartmentJS(name) {
   return n;
 }
 
-/* ========== تحميل الطلبات ========== */
 
 async function loadRequestsForUser(dept) {
 console.log("📨 إرسال طلب إلى السيرفر للقسم:", dept);
 
-  // عرض رسالة انتظار
   document.getElementById('incoming-requests').innerHTML = '<div class="loading-message">جارٍ تحميل الطلبات...</div>';
   document.getElementById('outgoing-requests').innerHTML = '';
 
@@ -1121,7 +1074,6 @@ console.log("📨 إرسال طلب إلى السيرفر للقسم:", dept);
   console.log("✅ الرد من السيرفر:", data);
 
 
-    // 🔹 فصل الطلبات إلى واردة وصادرة مثل النسخة القديمة
     const deptStd = normalizeArabicJS(dept);
     const incoming = data.filter(r => {
       const recv = normalizeArabicJS(r['القسم المستلم']);
@@ -1133,7 +1085,6 @@ console.log("📨 إرسال طلب إلى السيرفر للقسم:", dept);
       return send.includes(deptStd) || deptStd.includes(send);
     });
 
-    // ✅ عرض النتائج في أقسامها
     renderRequests('incoming-requests', incoming);
     renderRequests('outgoing-requests', outgoing);
 
@@ -1143,7 +1094,6 @@ console.log("📨 إرسال طلب إلى السيرفر للقسم:", dept);
   }
 }
 
-/* ========== عرض الطلبات ========== */
 function renderRequests(containerId, list) {
   const c = document.getElementById(containerId);
   if (!Array.isArray(list) || !list.length) {
@@ -1194,7 +1144,7 @@ function renderRequests(containerId, list) {
 
            <div class="update-section">
   ${
-    // 👇 المستلم فقط يقدر يغير الحالة
+    
     normalizeArabicJS(req['القسم المستلم']) === normalizeArabicJS(currentUser.department)
       ? `
         <select class="status-select" onclick="event.stopPropagation()" onchange="updateRequestStatus('${req['رقم الطلب']}', this.value)">
@@ -1215,7 +1165,7 @@ function renderRequests(containerId, list) {
   <span id="timer-${req['رقم الطلب']}" class="timer-text">${req['الوقت'] || '00:00:00'}</span>
 </div>
 ${
-  // 🔹 الزر يظهر فقط لمدير القسم
+  
   currentUser.role === "مدير قسم"
     ? `
       <div class="delegate-section" style="margin-top:10px;">
@@ -1257,7 +1207,6 @@ ${
 }
 
 
-/* ========== ألوان الحالات ========== */
 function statusToClass(s) {
   if (s.includes('جديد')) return 'status-new';
   if (s.includes('مغلق')) return 'status-closed';
@@ -1267,23 +1216,20 @@ function statusToClass(s) {
 }
 
 
-/* ========== فلترة حسب الحالة ========== */
 function filterRequestsByStatus() {
   const status = document.getElementById('statusFilter').value.trim();
   const allCards = document.querySelectorAll('.request-card');
 
   allCards.forEach(card => {
-    // نقرأ الحالة الحقيقية من داخل العنصر الخاص بها
+    
     const badge = card.querySelector('.status-badge');
     const cardStatus = badge ? badge.textContent.trim() : '';
 
-    // إذا ما تم اختيار فلتر → نظهر الكل
     if (!status) {
       card.style.display = 'block';
       return;
     }
 
-    // إذا كانت الحالة تطابق الفلتر بالضبط → أظهر البطاقة
     if (normalizeArabicJS(cardStatus) === normalizeArabicJS(status)) {
       card.style.display = 'block';
     } else {
@@ -1293,21 +1239,20 @@ function filterRequestsByStatus() {
 }
 
 
-/* ========== دالة تحديث الحالة ========== */
 async function updateRequestStatus(reqId, newStatus) {
-  if (event) event.stopPropagation(); // ✅ يمنع فتح نافذة التفاصيل
+  if (event) event.stopPropagation(); 
   if (!newStatus) return;
 
   const updater = currentUser.name;
   const payload = { requestId: reqId, status: newStatus, updater };
 
-  // 🔹 تحكم في المؤقت حسب الحالة
+ 
   if (newStatus === "جاري التنفيذ") {
     startTimer(reqId);
   }
 
   if (newStatus === "معلق") {
-    pauseTimer(reqId); // توقف مؤقت
+    pauseTimer(reqId); 
   }
 
   if (newStatus === "مغلق") {
@@ -1335,30 +1280,27 @@ async function updateRequestStatus(reqId, newStatus) {
   }
 }
 
-/* ========== نظام المؤقت ========== */
 let timers = {};
-let savedTimes = {}; // 🧠 لحفظ الوقت عند التوقف المؤقت
+let savedTimes = {}; 
 
 function startTimer(reqId, baseSeconds = null) {
   const el = document.getElementById(`timer-${reqId}`);
   if (!el) return;
 
-  // ⏱️ إذا فيه وقت محفوظ نكمل منه، وإذا لا نبدأ من baseSeconds
   let seconds = savedTimes[reqId] ?? baseSeconds ?? 0;
 
   clearInterval(timers[reqId]);
   timers[reqId] = setInterval(() => {
     seconds++;
-    savedTimes[reqId] = seconds; // 🔹 نحفظ الوقت باستمرار
+    savedTimes[reqId] = seconds; 
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
     const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
     const s = String(seconds % 60).padStart(2, '0');
     el.textContent = `${h}:${m}:${s}`;
 
-    // 🎨 تغيير اللون حسب المدة
-    if (seconds < 300) el.style.background = '#e8f5e9'; // أخضر فاتح
-    else if (seconds < 1800) el.style.background = '#fff8e1'; // أصفر
-    else el.style.background = '#ffebee'; // أحمر فاتح
+    if (seconds < 300) el.style.background = '#e8f5e9'; 
+    else if (seconds < 1800) el.style.background = '#fff8e1'; 
+    else el.style.background = '#ffebee';
   }, 1000);
 }
 
@@ -1377,14 +1319,13 @@ function stopTimer(reqId) {
   const el = document.getElementById(`timer-${reqId}`);
   const time = el ? el.textContent : "00:00:00";
 
-  // 🧹 حذف الوقت المحفوظ بعد الإغلاق
+ 
   delete savedTimes[reqId];
 
   return time;
 }
 
 
-/* ========== Toast بسيط للإشعارات ========== */
 function showToast(msg, type = "info") {
   const toast = document.createElement("div");
   toast.className = `toast show ${type}`;
@@ -1394,7 +1335,6 @@ function showToast(msg, type = "info") {
 }
 
 
-/* ========== إرسال طلب جديد ========== */
 document.getElementById('newRequestForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -1426,7 +1366,7 @@ document.getElementById('newRequestForm').addEventListener('submit', async (e) =
       alert("✅ تم إرسال الطلب بنجاح");
       closeNewRequestModal();
       document.getElementById('newRequestForm').reset();
-      await loadRequests(); // ✅ تحديث الطلبات بعد الإرسال
+      await loadRequests(); 
     } else {
       alert("❌ حدث خطأ أثناء الإرسال: " + (data.message || 'غير معروف'));
     }
@@ -1435,8 +1375,7 @@ document.getElementById('newRequestForm').addEventListener('submit', async (e) =
     alert("❌ لم يتم الاتصال بالخادم، تأكد من أن السيرفر يعمل.");
   }
 });
-
-/* ========== عرض المرفقات ========== */
+  
 function openFileViewer(url) {
   const viewerBody = document.getElementById('fileViewerBody');
   viewerBody.innerHTML = '';
@@ -1463,14 +1402,12 @@ function closeFileViewer(e) {
   }
 }
 
-/* ========== فتح وغلق نموذج الطلب الجديد مع الإغلاق عند النقر بالخارج ========== */
 function openNewRequestModal() {
   const modal = document.getElementById('newRequestModal');
   modal.style.display = 'flex';
   modal.style.opacity = '1';
   modal.style.pointerEvents = 'auto';
 
-  // ✅ إضافة مراقب للنقر خارج النافذة بعد فتحها بقليل لتجنب التقاط نقرة الزر نفسه
   setTimeout(() => {
     document.addEventListener('click', handleOutsideClick);
   }, 200);
@@ -1482,17 +1419,14 @@ function closeNewRequestModal() {
   modal.style.opacity = '0';
   modal.style.pointerEvents = 'none';
 
-  // ✅ إزالة المراقب بعد الإغلاق
   document.removeEventListener('click', handleOutsideClick);
 }
 
-// 🔹 دالة تتحقق من النقر خارج نافذة المحتوى
 function handleOutsideClick(e) {
   const modal = document.getElementById('newRequestModal');
   const content = modal.querySelector('.request-modal-content');
-  const openButton = document.querySelector('.new-request-btn'); // زر الفتح نفسه
+  const openButton = document.querySelector('.new-request-btn'); 
 
-  // ✅ إذا المستخدم ضغط خارج النافذة، وليس على الزر
   if (
     modal.style.display === 'flex' &&
     !content.contains(e.target) &&
@@ -1504,7 +1438,6 @@ function handleOutsideClick(e) {
 }
 
 
-/* ========== زر الخروج ========== */
 function logout() {
   if (confirm('هل أنت متأكد أنك تريد تسجيل الخروج؟')) {
     localStorage.removeItem('currentUser');
@@ -1534,7 +1467,6 @@ async function exportRequests() {
     alert('❌ حدث خطأ أثناء تصدير الطلبات');
 }
 
-/* ========== دالة التوكيل ========== */
 async function delegateRequest(reqId, delegateName) {
   if (!delegateName) return;
   if (!confirm(`هل تريد توكيل الطلب رقم ${reqId} إلى ${delegateName}؟`)) return;
@@ -1562,8 +1494,7 @@ async function delegateRequest(reqId, delegateName) {
     showToast("فشل الاتصال بالخادم", "error");
   }
 }
-
- // 🧠 جميع الأقسام (تلقائياً من البيانات اللي عندك)
+  
 const departments = [
   "الإدارة العامة",
   "الإدارة الإدارية",
@@ -1596,17 +1527,14 @@ const departments = [
   "قسم الخدمات - فني صيانة"
 ];
 
-// ✅ تعبئة القائمة تلقائياً مع خيار "جميع الأقسام"
 const deptContainer = document.getElementById('deptOptions');
 
-// أول خيار: جميع الأقسام
 const allOption = document.createElement('div');
 allOption.className = 'dropdown-item all-depts';
 allOption.textContent = " جميع الأقسام";
 allOption.onclick = () => selectDept("جميع الأقسام");
 deptContainer.appendChild(allOption);
 
-// بعده نضيف باقي الأقسام
 departments.forEach(dep => {
   const div = document.createElement('div');
   div.className = 'dropdown-item';
@@ -1615,19 +1543,16 @@ departments.forEach(dep => {
   deptContainer.appendChild(div);
 });
 
-// 🔹 فتح/إغلاق القائمة
 function toggleDeptDropdown() {
   document.getElementById('deptDropdown').classList.toggle('active');
 }
 
-// 🔹 اختيار قسم
 function selectDept(name) {
   document.getElementById('deptSelectedText').textContent = name || "جميع الأقسام";
   document.getElementById('deptDropdown').classList.remove('active');
   filterRequests();
 }
 
-// 🔹 بحث داخل القائمة
 function filterDeptList() {
   const input = document.getElementById("deptSearch").value.toLowerCase();
   const items = document.querySelectorAll(".dropdown-item");
@@ -1635,23 +1560,19 @@ function filterDeptList() {
     i.style.display = i.textContent.toLowerCase().includes(input) ? "block" : "none";
   });
 
-  // نضمن أن خيار جميع الأقسام يبقى ظاهر دائمًا
   document.querySelector(".all-depts").style.display = "block";
 }
 
-// 🔹 إغلاق القائمة عند النقر خارجها
 window.addEventListener('click', (e) => {
   const dropdown = document.getElementById('deptDropdown');
   if (!dropdown.contains(e.target)) dropdown.classList.remove('active');
 });
 
-/* ✅ فلترة الطلبات بحيث تظهر الصادرة والواردة معًا + إمكانية العودة لجميع الأقسام */
 function filterRequests() {
   const status = document.getElementById("statusFilter").value.trim();
   const dept = document.getElementById("deptSelectedText").textContent.trim();
   const allCards = document.querySelectorAll(".request-card");
 
-  // 🟦 إذا المستخدم اختار "جميع الأقسام" → نعرض كل الطلبات
   if (dept === "جميع الأقسام" || !dept) {
     allCards.forEach(card => {
       const text = card.innerText || "";
@@ -1665,7 +1586,6 @@ function filterRequests() {
     return;
   }
 
-  // 🔹 توحيد النصوص لتجنب اختلاف الهمزات والمسافات
   const normalizedDept = normalizeArabicJS(dept);
   allCards.forEach(card => {
     const text = normalizeArabicJS(card.innerText || "");
@@ -1673,18 +1593,15 @@ function filterRequests() {
       text.includes(normalizedDept) || text.includes(dept.replace(/\s/g, ""));
     const matchStatus = !status || text.includes(status);
 
-    // ✅ نعرض الطلب فقط إذا كان القسم المرسل أو المستلم يطابق القسم المحدد
     card.style.display = (matchDept && matchStatus) ? "block" : "none";
   });
 
-  // 📝 تحديث العنوان في الأعلى
   document.getElementById("pageTitle").textContent = `طلبات قسم ${dept}`;
 }
 
-  /* ========== تفاصيل الطلب والدردشة ========== */
 async function openTicketDetails(reqId) {
   try {
-    // جلب تفاصيل الطلب من نفس البيانات الظاهرة
+    
     const res = await fetch('/api/get_requests', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
@@ -1703,7 +1620,7 @@ async function openTicketDetails(reqId) {
       <p><strong>الحالة:</strong> ${ticket['الحالة'] || ''}</p>
     `;
 
-    // تحميل الرسائل القديمة
+    
     loadChatMessages(reqId);
 
     document.getElementById('ticketDetailsModal').style.display = 'flex';
@@ -1723,10 +1640,6 @@ function closeTicketDetails(e) {
 }
 
 
-
-/* ========== دردشة التذكرة المحترفة ========== */
-
-// ✅ تحميل الرسائل
 async function loadChatMessages(reqId) {
   try {
     const res = await fetch(`/api/chat_get/${reqId}`);
@@ -1759,7 +1672,6 @@ async function loadChatMessages(reqId) {
   }
 }
 
-// ✅ إرسال رسالة مع مرفق
 async function sendChatMessage() {
   const reqId = document.getElementById('ticketDetailsModal').dataset.reqid;
   const msg = document.getElementById('chatInput').value.trim();
@@ -1796,7 +1708,6 @@ async function sendChatMessage() {
   }
 }
 
-// ✅ تحديث تلقائي كل 10 ثوانٍ
 setInterval(() => {
   const modal = document.getElementById('ticketDetailsModal');
   if (modal && modal.style.display === 'flex') {
@@ -1805,7 +1716,6 @@ setInterval(() => {
   }
 }, 10000);
 
-// ✅ عرض اسم الملف عند اختياره
 document.getElementById('chatAttachment').addEventListener('change', e => {
   const file = e.target.files[0];
   const label = document.getElementById('selectedFileLabel');
@@ -1831,4 +1741,5 @@ document.getElementById('chatAttachment').addEventListener('change', e => {
 </style>
 </body>
 </html>
+
 
