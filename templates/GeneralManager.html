@@ -7,126 +7,427 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif;}
-    body{background:#f8fbff;color:#2c3e50;min-height:100vh;display:flex;}
-    .status-header{height:6px;}
-    .status-new{background:#2196f3;}
-    .status-assigned{background:#00bcd4;}
-    .status-in-progress{background:#ff9800;}
-    .status-on-hold{background:#ff5722;}
-    .status-closed{background:#4caf50;}
-    .status-rejected{background:#f44336;}
-    .card-content{padding:24px;}
-    .card-top{display:flex;justify-content:space-between;margin-bottom:14px;}
-    .request-id{font-weight:700;color:#1e88e5;font-size:18px;}
-    .request-date{color:#7f8c8d;font-size:14px;}
-    .request-title{font-size:20px;margin-bottom:12px;color:#2c3e50;font-weight:600;}
-    .request-desc{color:#555;margin-bottom:18px;line-height:1.6;font-size:15px;}
-    .request-meta{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:18px;font-size:14px;color:#34495e;}
-    .meta-item{display:flex;align-items:center;gap:6px;}
-    .logout-btn{background:#e3f2fd;color:#1976d2;border:none;padding:6px 14px;border-radius:8px;font-weight:600;cursor:pointer;transition:all 0.2s;}
-    .logout-btn:hover{background:#bbdefb;}
-    .sidebar{width:250px;background:white;height:100vh;position:fixed;top:0;right:0;box-shadow:-2px 0 10px rgba(0,0,0,0.08);z-index:999;padding-top:70px;overflow-y:auto;}
-    .sidebar-header{padding:16px 20px;font-weight:700;color:#0d47a1;border-bottom:1px solid #eee;font-size:18px;}
-    .dept-list{list-style:none;padding:0;}
-    .dept-item{padding:14px 20px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:12px;border-right:3px solid transparent;}
-    .dept-item:hover{background:#f5f9ff;}
-    .dept-item.active{background:#e3f2fd;border-right:3px solid #1e88e5;color:#1e88e5;font-weight:600;}
-    .dept-item i{width:24px;text-align:center;}
-    .main-content{flex:1;margin-right:250px;padding:30px 20px 20px;margin-top:70px;}
-    .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
-    .page-title{font-size:26px;color:#0d47a1;font-weight:700;}
-    .new-request-btn{padding:10px 20px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:transform 0.2s,box-shadow 0.2s;}
-    .new-request-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(33,150,243,0.3);}
-    .requests-grid{display:grid;gap:20px;}
-    .request-card{background:white;border-radius:16px;padding:22px;box-shadow:0 4px 12px rgba(0,0,0,0.05);border:1px solid #f0f7ff;transition:all 0.2s ease;}
-    .request-card:hover{box-shadow:0 6px 16px rgba(30,136,229,0.1);}
-    .status-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;color:white;}
-    .status-info{font-size:13px;color:#555;}
-    .status-label{font-weight:600;color:#1e88e5;}
-    .no-requests{text-align:center;padding:40px;color:#7f8c8d;font-style:italic;font-size:16px;}
-    .request-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;}
-    .request-modal-content{background:white;width:90%;max-width:500px;border-radius:16px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
-    .form-group{margin-bottom:20px;}
-    .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#34495e;}
-    .form-control{width:100%;padding:12px;border:2px solid #e3f2fd;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:15px;direction:rtl;}
-    .submit-btn{width:100%;padding:12px;background:linear-gradient(to right,#2196f3,#1976d2);color:white;border:none;border-radius:12px;font-weight:600;font-size:16px;cursor:pointer;}
-    .submit-btn:hover{background:linear-gradient(to right,#1e88e5,#1565c0);}
-    .chatbot-float-btn{position:fixed;bottom:30px;left:30px;width:60px;height:60px;background:linear-gradient(to right,#2196f3,#1976d2);border-radius:50%;display:flex;justify-content:center;align-items:center;color:white;font-size:24px;cursor:pointer;box-shadow:0 4px 12px rgba(33,150,243,0.4);z-index:999;transition:transform 0.2s;}
-    .chatbot-float-btn:hover{transform:scale(1.1);}
-    /* زر الشات + نافذة مصغّرة (يمين/أسفل) */
-    .chatbot-float-btn{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:linear-gradient(135deg,#1976d2,#42a5f5);border-radius:50%;display:flex;justify-content:center;align-items:center;color:white;font-size:22px;cursor:pointer;box-shadow:0 8px 24px rgba(25,118,210,.35);z-index:1500;}
-    .chatbot-widget{position:fixed;bottom:88px;right:24px;width:360px;max-height:540px;background:#fff;border:1px solid #e6eefc;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.12);display:flex;flex-direction:column;overflow:hidden;z-index:1500;}
-    .hidden{display:none!important;}
-    .cb-header{background:linear-gradient(90deg,#1976d2,#1e88e5);color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;}
-    .cb-title{display:flex;align-items:center;gap:8px;font-weight:700}
-    .cb-close{background:transparent;border:none;color:#fff;font-size:16px;cursor:pointer}
-    .cb-body{padding:10px;height:100%;overflow:auto;display:flex;flex-direction:column;gap:8px;background:#f8fbff}
-    .cb-msg{max-width:85%;padding:8px 10px;border-radius:12px;line-height:1.5;font-size:14px;white-space:pre-wrap}
-    .cb-msg.user{align-self:flex-end;background:#e3f2fd;border-top-left-radius:4px}
-    .cb-msg.bot{align-self:flex-start;background:#ffffff;border:1px solid #ecf2ff;border-top-right-radius:4px}
-    .cb-input{padding:8px;border-top:1px solid #e6eefc;background:#fff;display:flex;gap:8px;align-items:flex-end}
-    .cb-input textarea{flex:1;resize:none;min-height:40px;max-height:120px;padding:8px;border:2px solid #e6eefc;border-radius:10px;font-size:14px;direction:rtl}
-    .cb-send{padding:9px 12px;background:#1976d2;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer}
-    .cb-send:disabled{opacity:.6;cursor:not-allowed}
-    .cb-typing{align-self:flex-start;color:#888;font-size:12px;display:flex;align-items:center;gap:6px}
-    .cb-typing .dots{letter-spacing:2px;animation:blink 1.4s infinite}
-    @keyframes blink{0%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+  
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Tajawal', sans-serif;
+}
 
-    /* ✅ إصلاح مشكلة الأزرار غير القابلة للنقر */
+body {
+  background: #f8fbff;
+  color: #2c3e50;
+  min-height: 100vh;
+  display: flex;
+}
+
+.status-header       { height: 6px; }
+.status-new           { background: #2196f3; }
+.status-assigned      { background: #00bcd4; }
+.status-in-progress   { background: #ff9800; }
+.status-on-hold       { background: #ff5722; }
+.status-closed        { background: #4caf50; }
+.status-rejected      { background: #f44336; }
+
+
+.card-content         { padding: 24px; }
+.card-top             { display: flex; justify-content: space-between; margin-bottom: 14px; }
+
+.request-id           { font-weight: 700; color: #1e88e5; font-size: 18px; }
+.request-date         { color: #7f8c8d; font-size: 14px; }
+.request-title        { font-size: 20px; margin-bottom: 12px; color: #2c3e50; font-weight: 600; }
+.request-desc         { color: #555; margin-bottom: 18px; line-height: 1.6; font-size: 15px; }
+
+.request-meta         { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; font-size: 14px; color: #34495e; }
+.meta-item            { display: flex; align-items: center; gap: 6px; }
+
+
+.logout-btn {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.logout-btn:hover {
+  background: #bbdefb;
+}
+
+
+.sidebar {
+  width: 250px;
+  background: white;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  right: 0;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.08);
+  z-index: 999;
+  padding-top: 70px;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 16px 20px;
+  font-weight: 700;
+  color: #0d47a1;
+  border-bottom: 1px solid #eee;
+  font-size: 18px;
+}
+
+.dept-list     { list-style: none; padding: 0; }
+.dept-item     { padding: 14px 20px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; border-right: 3px solid transparent; }
+.dept-item:hover { background: #f5f9ff; }
+.dept-item.active {
+  background: #e3f2fd;
+  border-right: 3px solid #1e88e5;
+  color: #1e88e5;
+  font-weight: 600;
+}
+.dept-item i { width: 24px; text-align: center; }
+
+.main-content {
+  flex: 1;
+  margin-right: 250px;
+  padding: 30px 20px 20px;
+  margin-top: 70px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.page-title {
+  font-size: 26px;
+  color: #0d47a1;
+  font-weight: 700;
+}
+
+.new-request-btn {
+  padding: 10px 20px;
+  background: linear-gradient(to right, #2196f3, #1976d2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.new-request-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.requests-grid {
+  display: grid;
+  gap: 20px;
+}
+
+
+.requests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+  justify-content: center;
+}
+
+.request-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #e3f2fd;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  text-align: right;
+  aspect-ratio: 1 / 1; 
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.request-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(30, 136, 229, 0.18);
+}
+
+.request-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0d47a1;
+  margin: 8px 0;
+  line-height: 1.5;
+  height: 48px;
+  overflow: hidden;
+}
+
+.request-desc {
+  font-size: 14px;
+  color: #607d8b;
+  line-height: 1.6;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 10px;
+}
+
+.status-info {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fbfd;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.view-file-btn {
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  background: linear-gradient(90deg, #42a5f5, #1e88e5);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.25s;
+  margin-top: 8px;
+  font-weight: 600;
+}
+.view-file-btn:hover {
+  background: linear-gradient(90deg, #1e88e5, #2196f3);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.25);
+}
+
+.status-header {
+  height: 6px;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.meta-item {
+  font-size: 13px;
+  color: #455a64;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.request-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.request-modal-content {
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.form-group       { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #34495e; }
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e3f2fd;
+  border-radius: 12px;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 15px;
+  direction: rtl;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to right, #2196f3, #1976d2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+.submit-btn:hover {
+  background: linear-gradient(to right, #1e88e5, #1565c0);
+}
+
+.chatbot-float-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(25, 118, 210, .35);
+  z-index: 1500;
+  transition: transform 0.2s;
+}
+.chatbot-float-btn:hover {
+  transform: scale(1.1);
+}
+
+.chatbot-widget {
+  position: fixed;
+  bottom: 88px;
+  right: 24px;
+  width: 360px;
+  max-height: 540px;
+  background: #fff;
+  border: 1px solid #e6eefc;
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1500;
+}
+
+.hidden { display: none !important; }
+
+.cb-header {
+  background: linear-gradient(90deg, #1976d2, #1e88e5);
+  color: #fff;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cb-title { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.cb-close { background: transparent; border: none; color: #fff; font-size: 16px; cursor: pointer; }
+
+.cb-body {
+  padding: 10px;
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f8fbff;
+}
+
+.cb-msg {
+  max-width: 85%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  line-height: 1.5;
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+.cb-msg.user {
+  align-self: flex-end;
+  background: #e3f2fd;
+  border-top-left-radius: 4px;
+}
+
+.cb-msg.bot {
+  align-self: flex-start;
+  background: #ffffff;
+  border: 1px solid #ecf2ff;
+  border-top-right-radius: 4px;
+}
+
+.cb-input {
+  padding: 8px;
+  border-top: 1px solid #e6eefc;
+  background: #fff;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.cb-input textarea {
+  flex: 1;
+  resize: none;
+  min-height: 40px;
+  max-height: 120px;
+  padding: 8px;
+  border: 2px solid #e6eefc;
+  border-radius: 10px;
+  font-size: 14px;
+  direction: rtl;
+}
+
+.cb-send {
+  padding: 9px 12px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cb-send:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.cb-typing {
+  align-self: flex-start;
+  color: #888;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cb-typing .dots {
+  letter-spacing: 2px;
+  animation: blink 1.4s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: .2; }
+  50% { opacity: 1; }
+  100% { opacity: .2; }
+}
+
 .chatbot-widget.hidden,
 .file-viewer-modal:not([style*="display: flex"]) {
   pointer-events: none !important;
   opacity: 0;
 }
 
-.chatbot-widget.hidden {
-  display: none !important;
-}
+.chatbot-widget.hidden { display: none !important; }
 
-/* ضمان أن النوافذ العائمة لا تغطي إلا عند الفتح */
 .chatbot-widget,
 .file-viewer-modal {
   pointer-events: auto;
-}
-
-    /* 🎨 تصميم فلتر القسم مع البحث */
-.searchable-select {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 220px;
-  background: white;
-  border: 2px solid #e3f2fd;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.searchable-select input {
-  border: none;
-  border-bottom: 1px solid #e3f2fd;
-  padding: 8px 10px;
-  outline: none;
-  font-family: 'Tajawal';
-  font-size: 14px;
-}
-
-.searchable-select select {
-  border: none;
-  outline: none;
-  padding: 5px;
-  height: 150px;
-  overflow-y: auto;
-  font-family: 'Tajawal';
-  background: white;
-}
-
-.searchable-select select option {
-  padding: 6px 10px;
-}
-
-.searchable-select select option:hover {
-  background: #e3f2fd;
 }
 
   </style>
@@ -217,7 +518,6 @@
         <select id="targetDept" class="form-control" required>
   <option value="">اختر القسم</option>
 
-  <!-- 🏢 الإدارات الرئيسية -->
   <optgroup label="الإدارات الرئيسية">
     <option value="الإدارة العامة">الإدارة العامة</option>
     <option value="الإدارة الإدارية">الإدارة الإدارية</option>
@@ -235,7 +535,6 @@
     <option value="قسم المشتريات">قسم المشتريات</option>
   </optgroup>
 
-  <!-- 💼 أقسام المبيعات -->
   <optgroup label="أقسام المبيعات">
     <option value="قسم المبيعات الهاتفية">قسم المبيعات الهاتفية</option>
     <option value="قسم المبيعات الهاتفية الرياض">قسم المبيعات الهاتفية الرياض</option>
@@ -245,20 +544,17 @@
     <option value="قسم مبيعات الصالة - جدة">قسم مبيعات الصالة - جدة</option>
   </optgroup>
 
-  <!-- 🔧 أقسام الصيانة والخدمات -->
   <optgroup label="أقسام الصيانة والخدمات">
     <option value="قسم استقبال عملاء الصيانة">قسم استقبال عملاء الصيانة</option>
     <option value="قسم خدمة عملاء الصيانة">قسم خدمة عملاء الصيانة</option>
     <option value="قسم الخدمات - فني صيانة">قسم الخدمات - فني صيانة</option>
   </optgroup>
 
-  <!-- 🧾 أقسام المخزون والمشتريات -->
   <optgroup label="أقسام المخزون والمشتريات">
     <option value="قسم مخزون السيارات">قسم مخزون السيارات</option>
     <option value="قسم المشتريات">قسم المشتريات</option>
   </optgroup>
 
-  <!-- 🧹 أقسام النظافة والاستقبال -->
   <optgroup label="أقسام النظافة والاستقبال">
     <option value="قسم النظافة والاستقبال المدينة">قسم النظافة والاستقبال المدينة</option>
     <option value="قسم النظافة والاستقبال الرياض 1">قسم النظافة والاستقبال الرياض 1</option>
@@ -267,7 +563,7 @@
     <option value="قسم الاستقبال والنظافة">قسم الاستقبال والنظافة</option>
   </optgroup>
 
-  <!-- 🏬 الفروع -->
+ 
   <optgroup label="الفروع">
     <option value="إدارة فرع جدة">إدارة فرع جدة</option>
   </optgroup>
@@ -284,10 +580,8 @@
   </div>
 </div>
 
-<!-- زر الشات العائم -->
 <div class="chatbot-float-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></div>
 
-<!-- نافذة الشات المصغّرة -->
 <div id="chatbotWidget" class="chatbot-widget hidden" aria-live="polite">
   <div class="cb-header">
     <div class="cb-title"><i class="fas fa-robot"></i> مساعد SEVENS</div>
@@ -300,7 +594,6 @@
   </div>
 </div>
 
-<!-- 🗂️ نافذة عرض المرفقات -->
 <div id="fileViewerModal" class="file-viewer-modal" onclick="closeFileViewer(event)">
   <div class="file-viewer-content">
     <span class="close-btn" onclick="closeFileViewer(event)">&times;</span>
@@ -310,14 +603,11 @@
 </div>
 
 <script>
-/* ========== تعريف المستخدم الحالي ========== */
 let currentUser = null;
 let chatHistory = [];
 let activeTimers = {};
 let allEmployees = [];
 
-/* ========== دالة إضافة رسالة في واجهة الشات ========== */
-/* 🔹 تعريف الدالة قبل الاستدعاء */
 function appendMsg(sender, text) {
   const cbBody = document.getElementById("cbBody");
   if (!cbBody) return;
@@ -328,7 +618,7 @@ function appendMsg(sender, text) {
   cbBody.scrollTop = cbBody.scrollHeight;
 }
 
-/* 🔹 عند تحميل الصفحة */
+
 window.onload = async () => {
   console.log("🚀 بدء تشغيل الصفحة...");
   let userData = null;
@@ -346,10 +636,10 @@ window.onload = async () => {
   document.getElementById("pageTitle").textContent =
     `لوحة قسم ${currentUser.department}`;
 
-  // ✅ السطر الصحيح هنا
+ 
   appendMsg("bot", "مرحباً! أنا مساعد SEVENS، اسألني أي شيء بخصوص الطلبات 🤖");
 
-  // 🧩 تحميل قائمة الموظفين من السيرفر
+
   try {
     const res = await fetch('/api/get_employees', {
   method: 'POST',
@@ -378,14 +668,30 @@ function loadRequests() {
 }
 
 
-/* ========== 🧩 دالة توحيد جميع الأقسام الموجودة بالإكسل ========== */
-/* ✅ دالة موحدة شاملة لتطابق جميع الأقسام مهما اختلف الاسم */
+setInterval(() => {
+ 
+  const modal = document.getElementById('newRequestModal');
+  const isModalOpen = modal && modal.style.display === 'flex';
+
+  const fileViewer = document.getElementById('fileViewerModal');
+  const isFileOpen = fileViewer && fileViewer.style.display === 'flex';
+
+  if (!isModalOpen && !isFileOpen) {
+    console.log("🔁 تحديث تلقائي للطلبات...");
+    loadRequestsForUser(currentUser.department);
+
+    showToast("🔄 تم تحديث الطلبات تلقائياً", "info");
+  } else {
+    console.log("⏸️ تم إيقاف التحديث المؤقت لأن المستخدم يكتب أو يعرض نافذة.");
+  }
+}, 30000); 
+
+
 function normalizeDepartmentJS(name) {
   if (!name) return '';
   let n = name.toString().trim().toLowerCase();
   n = n.replace(/[إأآا]/g, 'ا').replace(/\s+/g, '').replace(/ة/g, 'ه');
 
-  // 🏢 الإدارات الرئيسية
   if (n.includes('الادارهالعامه')) return 'الادارهالعامه';
   if (n.includes('الادارهالاداريه')) return 'الادارهالاداريه';
   if (n.includes('الماليه')) return 'الادارهالماليه';
@@ -401,7 +707,7 @@ function normalizeDepartmentJS(name) {
   if (n.includes('مخزون') || n.includes('مستودع')) return 'ادارهالمخزونمستودعالسيارات';
   if (n.includes('مشتريات')) return 'قسمالمشتريات';
 
-  // 💼 أقسام المبيعات
+
   if (n.includes('هاتفي') || n.includes('الهاتفيه')) {
     if (n.includes('رياض')) return 'قسمالمبيعاتالهاتفيهالرياض';
     return 'قسمالمبيعاتالهاتفيه';
@@ -415,15 +721,15 @@ function normalizeDepartmentJS(name) {
     return 'قسممبيعاتالصاله';
   }
 
-  // 🔧 الصيانة والخدمات
+
   if (n.includes('استقبال') && n.includes('صيان')) return 'قسماستقبالعملاءالصيانه';
   if (n.includes('خدمه') && n.includes('عملاء')) return 'قسمخدمعملاءالصيانه';
   if (n.includes('فني') && n.includes('صيان')) return 'قسمالخدماتفنيصيانة';
 
-  // 🧾 المخزون والمشتريات
+ 
   if (n.includes('مخزون') && n.includes('سيارات')) return 'قسممخزونالسيارات';
 
-  // 🧹 النظافة والاستقبال
+ 
   if (n.includes('نظاف') || n.includes('استقبال')) {
     if (n.includes('مدينه')) return 'قسمالنظافهوالاستقبالالمدينه';
     if (n.includes('جده')) return 'قسمالنظافهوالاستقبالجده';
@@ -433,7 +739,7 @@ function normalizeDepartmentJS(name) {
     return 'قسمالاستقبالوالنظافه';
   }
 
-  // 🏬 الفروع
+ 
   if (n.includes('فرع') && n.includes('جده')) return 'ادارهفرعجده';
   if (n.includes('فرع') && n.includes('رياض')) return 'ادارهفرعرياض';
 
@@ -441,18 +747,14 @@ function normalizeDepartmentJS(name) {
 }
 
 
-/* ========== تحميل الطلبات ========== */
-
-// ========== تحميل الطلبات ==========
 async function loadRequestsForUser(dept) {
   console.log("📨 إرسال طلب إلى السيرفر للقسم:", dept);
 
-  // ✅ عرض رسالة انتظار أثناء التحميل
   document.getElementById('requestsContainer').innerHTML =
     '<div class="no-requests">جارٍ تحميل الطلبات...</div>';
 
   try {
-    // ✅ جلب الطلبات من السيرفر
+    
     const res = await fetch('/api/get_requests', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -468,26 +770,26 @@ async function loadRequestsForUser(dept) {
     const data = await res.json();
     console.log("✅ الرد من السيرفر:", data);
 
-    // ✅ فلترة الطلبات حسب القسم المختار
+   
     let finalList = [];
     const deptStd = normalizeDepartmentJS(dept);
 
     if (dept === 'all') {
-      // المدير العام يشوف كل الطلبات
+      
       finalList = data;
     } else {
-      // المدير العام يشوف فقط الطلبات اللي هذا القسم "استلمها"
+     
       finalList = data.filter((r) => {
         const recv = normalizeDepartmentJS(r['القسم المستلم']);
         return recv.includes(deptStd);
       });
     }
 
-    // 🧠 اختبار مؤقت لعرض البيانات القادمة من السيرفر
+   
     console.log("📦 عدد الطلبات بعد الفلترة:", finalList.length);
     console.log("🧾 بيانات أول طلب:", finalList[0]);
 
-    // ✅ عرض النتيجة في الصفحة
+    
     renderRequests('requestsContainer', finalList);
 
   } catch (e) {
@@ -497,12 +799,10 @@ async function loadRequestsForUser(dept) {
   }
 }
 
-// 🔹 لجعل الدالة متاحة في onchange
 window.loadRequestsForUser = loadRequestsForUser;
 
 
 
-// ========== عرض الطلبات ==========
 function renderRequests(containerId, list) {
   const c = document.getElementById(containerId);
   if (!Array.isArray(list) || !list.length) {
@@ -516,7 +816,6 @@ function renderRequests(containerId, list) {
     const status = req['الحالة'] || '';
     const fileName = req['المرفق'] || '';
 
-    // ===================== صلاحيات تغيير الحالة =====================
     const canChangeStatus =
       (
         ["بلال رباح البلادي", "امجد عايض المحمدي", "شهد خليل عبيدالله الحربي"].includes(currentUser.name)
@@ -525,11 +824,10 @@ function renderRequests(containerId, list) {
         ? recvDept.includes(userDept) // المدير العام يغيّر فقط طلبات قسمه
         : (recvDept.includes(userDept) && currentUser.role === "مدير قسم");
 
-    // ===================== صلاحيات التوكيل =====================
     let canDelegate = false;
     let delegateOptions = [];
 
-    // 🟦 بلال وأمجد: يقدرون يوكلون لأي مدير قسم داخل قسمهم فقط
+   
     if (["بلال رباح البلادي", "امجد عايض المحمدي"].includes(currentUser.name) && currentUser.role === "مدير عام") {
       canDelegate = recvDept.includes(userDept);
       if (canDelegate) {
@@ -537,7 +835,7 @@ function renderRequests(containerId, list) {
       }
     }
 
-    // 🟪 شهد: توكيل فقط لموظفي الموارد البشرية داخل قسمها
+   
     else if (currentUser.name === "شهد خليل عبيدالله الحربي" && currentUser.role === "مدير عام") {
       canDelegate = recvDept === "ادارهالمواردالبشريه";
       if (canDelegate) {
@@ -548,7 +846,6 @@ function renderRequests(containerId, list) {
       }
     }
 
-    // 🟩 مدير القسم: يوكل فقط لموظفي قسمه
     else if (currentUser.role === "مدير قسم") {
       canDelegate = recvDept === userDept;
       delegateOptions = allEmployees.filter(e =>
@@ -557,7 +854,6 @@ function renderRequests(containerId, list) {
       );
     }
 
-    // ===================== بناء البطاقة =====================
     return `
       <div class="request-card" data-id="${req['رقم الطلب'] || ''}">
         <div class="status-header ${statusToClass(status)}"></div>
@@ -593,7 +889,7 @@ function renderRequests(containerId, list) {
                  </button></div>`
             : `<div class="meta-item"><i class="fas fa-paperclip"></i> لا يوجد مرفق</div>`}
 
-          <!-- ✅ تغيير الحالة -->
+         
           <div class="update-section">
             ${canChangeStatus ? `
               <select class="status-select" onchange="updateRequestStatus('${req['رقم الطلب']}', this.value)">
@@ -609,7 +905,7 @@ function renderRequests(containerId, list) {
             <span id="timer-${req['رقم الطلب']}" class="timer-text">${req['الوقت'] || '00:00:00'}</span>
           </div>
 
-          <!-- ✅ التوكيل -->
+         
           ${canDelegate ? `
             <div class="delegate-section" style="margin-top:10px;">
               <select class="form-control delegate-select" onchange="delegateRequest('${req['رقم الطلب']}', this.value)">
@@ -622,7 +918,6 @@ function renderRequests(containerId, list) {
       </div>`;
   }).join('');
 
-  // ✅ تشغيل المؤقتات حسب الحالة
   setTimeout(() => {
     list.forEach(req => {
       const status = (req['الحالة'] || '').trim();
@@ -637,7 +932,6 @@ function renderRequests(containerId, list) {
 }
 
 
-/* ========== ألوان الحالات ========== */
 function statusToClass(s) {
   if (s.includes('جديد')) return 'status-new';
   if (s.includes('مغلق')) return 'status-closed';
@@ -646,21 +940,32 @@ function statusToClass(s) {
   return 'status-assigned';
 }
 
-/* ========== فلترة حسب الحالة ========== */
 function filterRequestsByStatus() {
   const status = document.getElementById('statusFilter').value.trim();
   const allCards = document.querySelectorAll('.request-card');
+
   allCards.forEach(card => {
-    const text = card.innerText || '';
-    card.style.display = (!status || text.includes(status)) ? 'block' : 'none';
+    
+    const badge = card.querySelector('.status-badge');
+    const cardStatus = badge ? badge.textContent.trim() : '';
+
+    if (!status) {
+      card.style.display = 'block';
+      return;
+    }
+
+    if (normalizeArabicJS(cardStatus) === normalizeArabicJS(status)) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
   });
 }
 
-/* ========== دالة تحديث الحالة ========== */
+
 async function updateRequestStatus(reqId, newStatus) {
   if (!newStatus) return;
 
-  // ✅ التحقق من الصلاحيات
   const reqCard = document.querySelector(`[data-id='${reqId}']`);
   if (!reqCard) return;
 
@@ -668,7 +973,6 @@ async function updateRequestStatus(reqId, newStatus) {
   const isSameDept = normalizeDepartmentJS(receiverText).includes(normalizeDepartmentJS(currentUser.department));
   const isGeneralManager = currentUser.role === "مدير عام";
 
-  // 🔒 المدير العام لا يمكنه تغيير حالة طلبات الأقسام الأخرى
   if (isGeneralManager && !isSameDept) {
     showToast("⚠️ لا يمكنك تغيير حالة طلبات الأقسام الأخرى", "error");
     return;
@@ -701,30 +1005,27 @@ async function updateRequestStatus(reqId, newStatus) {
   }
 }
 
-/* ========== نظام المؤقت ========== */
 let timers = {};
-let savedTimes = {}; // 🧠 لحفظ الوقت عند التوقف المؤقت
+let savedTimes = {}; 
 
 function startTimer(reqId, baseSeconds = null) {
   const el = document.getElementById(`timer-${reqId}`);
   if (!el) return;
 
-  // ⏱️ إذا فيه وقت محفوظ نكمل منه، وإذا لا نبدأ من baseSeconds
   let seconds = savedTimes[reqId] ?? baseSeconds ?? 0;
 
   clearInterval(timers[reqId]);
   timers[reqId] = setInterval(() => {
     seconds++;
-    savedTimes[reqId] = seconds; // 🔹 نحفظ الوقت باستمرار
+    savedTimes[reqId] = seconds; 
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
     const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
     const s = String(seconds % 60).padStart(2, '0');
     el.textContent = `${h}:${m}:${s}`;
 
-    // 🎨 تغيير اللون حسب المدة
-    if (seconds < 300) el.style.background = '#e8f5e9'; // أخضر فاتح
-    else if (seconds < 1800) el.style.background = '#fff8e1'; // أصفر
-    else el.style.background = '#ffebee'; // أحمر فاتح
+    if (seconds < 300) el.style.background = '#e8f5e9'; 
+    else if (seconds < 1800) el.style.background = '#fff8e1'; 
+    else el.style.background = '#ffebee'; 
   }, 1000);
 }
 
@@ -743,14 +1044,11 @@ function stopTimer(reqId) {
   const el = document.getElementById(`timer-${reqId}`);
   const time = el ? el.textContent : "00:00:00";
 
-  // 🧹 حذف الوقت المحفوظ بعد الإغلاق
   delete savedTimes[reqId];
 
   return time;
 }
 
-
-/* ========== Toast بسيط للإشعارات ========== */
 function showToast(msg, type = "info") {
   const toast = document.createElement("div");
   toast.className = `toast show ${type}`;
@@ -760,7 +1058,6 @@ function showToast(msg, type = "info") {
 }
 
 
-/* ========== إرسال طلب جديد ========== */
 document.getElementById('newRequestForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -792,7 +1089,7 @@ document.getElementById('newRequestForm').addEventListener('submit', async (e) =
       alert("✅ تم إرسال الطلب بنجاح");
       closeNewRequestModal();
       document.getElementById('newRequestForm').reset();
-      await loadRequests(); // ✅ تحديث الطلبات بعد الإرسال
+      await loadRequests(); 
     } else {
       alert("❌ حدث خطأ أثناء الإرسال: " + (data.message || 'غير معروف'));
     }
@@ -802,7 +1099,6 @@ document.getElementById('newRequestForm').addEventListener('submit', async (e) =
   }
 });
 
-/* ========== عرض المرفقات ========== */
 function openFileViewer(url) {
   const viewerBody = document.getElementById('fileViewerBody');
   viewerBody.innerHTML = '';
@@ -829,14 +1125,12 @@ function closeFileViewer(e) {
   }
 }
 
-/* ========== فتح وغلق نموذج الطلب الجديد مع الإغلاق عند النقر بالخارج ========== */
 function openNewRequestModal() {
   const modal = document.getElementById('newRequestModal');
   modal.style.display = 'flex';
   modal.style.opacity = '1';
   modal.style.pointerEvents = 'auto';
 
-  // ✅ إضافة مراقب للنقر خارج النافذة بعد فتحها بقليل لتجنب التقاط نقرة الزر نفسه
   setTimeout(() => {
     document.addEventListener('click', handleOutsideClick);
   }, 200);
@@ -848,17 +1142,14 @@ function closeNewRequestModal() {
   modal.style.opacity = '0';
   modal.style.pointerEvents = 'none';
 
-  // ✅ إزالة المراقب بعد الإغلاق
   document.removeEventListener('click', handleOutsideClick);
 }
 
-// 🔹 دالة تتحقق من النقر خارج نافذة المحتوى
 function handleOutsideClick(e) {
   const modal = document.getElementById('newRequestModal');
   const content = modal.querySelector('.request-modal-content');
-  const openButton = document.querySelector('.new-request-btn'); // زر الفتح نفسه
+  const openButton = document.querySelector('.new-request-btn'); 
 
-  // ✅ إذا المستخدم ضغط خارج النافذة، وليس على الزر
   if (
     modal.style.display === 'flex' &&
     !content.contains(e.target) &&
@@ -870,7 +1161,6 @@ function handleOutsideClick(e) {
 }
 
 
-/* ========== زر الخروج ========== */
 function logout() {
   if (confirm('هل أنت متأكد أنك تريد تسجيل الخروج؟')) {
     localStorage.removeItem('currentUser');
@@ -900,7 +1190,6 @@ async function exportRequests() {
     alert('❌ حدث خطأ أثناء تصدير الطلبات');
 }
 
-/* ========== دالة التوكيل ========== */
 async function delegateRequest(reqId, delegateName) {
   if (!delegateName) return;
   if (!confirm(`هل تريد توكيل الطلب رقم ${reqId} إلى ${delegateName}؟`)) return;
@@ -945,7 +1234,5 @@ async function delegateRequest(reqId, delegateName) {
 .toast.info{background:#3498db;}
 .card-glow{border:2px solid #81c784;box-shadow:0 0 15px rgba(129,199,132,0.6);}
 </style>
-
-
 </body>
 </html>
