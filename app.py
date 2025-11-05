@@ -9,25 +9,46 @@ import re
 
 
 
-# ✅ تعريف المجلد الأساسي للمشروع
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# ✅ إنشاء مجلد الرفع
+
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+
+CHAT_PATH = os.path.join(BASE_DIR, "chat_messages.xlsx")
+
+def load_chats():
+    """تحميل سجل دردشات الطلبات من ملف Excel أو إنشاؤه إن لم يوجد"""
+    if not os.path.exists(CHAT_PATH):
+        df = pd.DataFrame(columns=['رقم الطلب', 'المرسل', 'القسم', 'الرسالة', 'الملف', 'الوقت'])
+        df.to_excel(CHAT_PATH, index=False)
+        print("✅ Created chat_messages.xlsx")
+        return df
+    try:
+        df = pd.read_excel(CHAT_PATH)
+       
+        df.columns = [str(c).strip() for c in df.columns]
+        for col in ['رقم الطلب', 'المرسل', 'القسم', 'الرسالة', 'الملف', 'الوقت']:
+            if col not in df.columns:
+                df[col] = ''
+        return df
+    except Exception as e:
+        print("❌ load_chats error:", e)
+        return pd.DataFrame(columns=['رقم الطلب', 'المرسل', 'القسم', 'الرسالة', 'الملف', 'الوقت'])
 
 def normalize_arabic(text):
     """توحيد النصوص العربية لتفادي اختلاف الهمزات والمسافات"""
     if not isinstance(text, str):
         text = str(text)
     text = text.strip()
-    text = re.sub(r'[إأآا]', 'ا', text)  # توحيد الألف والهمزات
-    text = re.sub(r'\s+', '', text)      # إزالة كل المسافات
-    text = text.replace('ة','ه')         # توحيد التاء المربوطة مع الهاء
+    text = re.sub(r'[إأآا]', 'ا', text) 
+    text = re.sub(r'\s+', '', text)     
+    text = text.replace('ة','ه')         
     return text
 
-# ============== إعدادات عامة ==============
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database.xlsx")
 REQUESTS_PATH = os.path.join(BASE_DIR, "requests.xlsx")
@@ -35,14 +56,12 @@ REQUESTS_SHEET = "الطلبات جميع"
 EXPORT_DIR = os.path.join(BASE_DIR, "exports")
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
-## مفتاح واجهة OpenRouter API  (احصل عليه من https://openrouter.ai)
 OPENROUTER_API_KEY = "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"
 
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# ============== دوال مساعدة ==============
 def ensure_excel_exists():
     if not os.path.exists(DB_PATH):
         users_cols = ['الاسم', 'الصلاحية', 'كلمة المرور', 'البريد الإلكتروني', 'القسم']
@@ -57,7 +76,6 @@ def ensure_excel_exists():
     else:
         print("📂 Excel files already exist ✅")
 
-# ✅ استدعِها مرة واحدة عند بدء التشغيل
 ensure_excel_exists()
 
 
@@ -69,7 +87,6 @@ def load_users():
     try:
         df = pd.read_excel(DB_PATH)
 
-        # 🔹 تنظيف الأعمدة من أي رموز أو فراغات غريبة
         df.columns = (
             df.columns
             .astype(str)
@@ -79,7 +96,7 @@ def load_users():
             .str.strip()
         )
 
-        # ✅ توحيد أسماء الأعمدة مهما كانت كتابتها
+        
         rename_map = {
             'الاسم': 'الاسم',
             'الاسمالكامل': 'الاسم',
@@ -104,14 +121,13 @@ def load_users():
             'role': 'الصلاحية'
         }
 
-        # 🧩 إعادة التسمية بناءً على التطابق الجزئي (حتى لو ناقص حرف)
+      
         for col in list(df.columns):
             normalized = re.sub(r'[إأآا]', 'ا', col).replace(' ', '').lower()
             for k, v in rename_map.items():
                 if re.sub(r'[إأآا]', 'ا', k).replace(' ', '').lower() in normalized:
                     df.rename(columns={col: v}, inplace=True)
 
-        # ✅ التأكد أن كل الأعمدة المهمة موجودة حتى لو ناقصة
         for col in ['الاسم', 'البريد الإلكتروني', 'القسم', 'الصلاحية', 'كلمة المرور']:
             if col not in df.columns:
                 df[col] = ''
@@ -123,7 +139,7 @@ def load_users():
 
 
 def normalize_department_names(df):
-    """توحيد أسماء الأقسام داخل قاعدة المستخدمين"""
+   
     if 'القسم' in df.columns:
         df['القسم'] = (
             df['القسم']
@@ -171,7 +187,7 @@ def generate_request_id():
     except:
         return f"REQ-{datetime.now().year}-001"
 
-# ============== الصفحات ==============
+
 @app.route('/')
 def index(): return render_template('Login.html')
 
@@ -186,11 +202,13 @@ def mgr_page(): return render_template('DepartmentManagerPage.html')
 
 @app.route('/GeneralManager.html')
 def gm_page(): return render_template('GeneralManager.html')
-
+@app.route('/HrPage.html')
+def hr_page():
+    return render_template('HrPage.html')
 @app.route('/ForgotYourPassword.html')
 def forgot_page(): return render_template('ForgotYourPassword.html')
 
-# ============== API: الدخول ==============
+
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
@@ -201,7 +219,6 @@ def login():
     if df.empty:
         return jsonify({"success": False, "message": "قاعدة المستخدمين فارغة"}), 500
 
-    # ✅ البحث عن عمود البريد الإلكتروني حتى لو مكتوب بصيغة مختلفة
     email_col = next((c for c in df.columns if 'بريد' in str(c) or 'email' in str(c) or 'ايميل' in str(c)), None)
     pass_col  = next((c for c in df.columns if 'مرور' in str(c) or 'password' in str(c)), None)
     role_col  = next((c for c in df.columns if 'صلاح' in str(c) or 'وظيف' in str(c) or 'role' in str(c)), None)
@@ -209,15 +226,15 @@ def login():
     if not email_col or not pass_col:
         return jsonify({"success": False, "message": "أعمدة البريد أو كلمة المرور غير موجودة في قاعدة البيانات"}), 500
 
-    # 🔹 تنظيف النصوص داخل الأعمدة
+   
     df[email_col] = df[email_col].astype(str).str.lower().str.strip()
     df[pass_col]  = df[pass_col].astype(str).str.strip()
 
-    # 🔹 دالة مقارنة ذكية تتجاهل المسافات والاختلافات الطفيفة
+   
     def normalize_text(t):
         return re.sub(r'\s+', '', str(t).strip().lower())
 
-    # ✅ البحث الذكي عن المستخدم
+   
     match = df[df.apply(
         lambda row: normalize_text(row[email_col]) == normalize_text(email)
         and normalize_text(row[pass_col]) == normalize_text(password),
@@ -229,25 +246,36 @@ def login():
 
     user = match.iloc[0].to_dict()
 
-    # ✅ معالجة الصلاحية
+   
     role = str(user.get(role_col or 'الصلاحية', '')).strip()
     role = role.replace('\u200f', '').replace('\u200e', '')
 
-    if role in ['مدير القسم', 'مدير أقسام', 'رئيس قسم']:
+    role_norm = re.sub(r'[إأآا]', 'ا', role).replace(' ', '').replace('ة', 'ه').lower()
+
+    if any(k in role_norm for k in ['المواردالبشريه', 'الموارد', 'بشر']):
+        role = 'إدارة الموارد البشرية'
+
+    elif any(k in role_norm for k in ['مديرقسم', 'مديرالقسم', 'رئيسقسم', 'رئيسالقسم', 'مديرالاقسام']):
         role = 'مدير قسم'
-    elif role in ['موظف', 'موظفه', 'عامل']:
-        role = 'موظف'
-    elif role in ['مدير عام', 'الإدارة العامة']:
+
+    elif any(k in role_norm for k in ['مديرعام', 'الادارهالعامه', 'الاداره', 'ادارهعامه']):
         role = 'مدير عام'
 
-    # ✅ تحديد الاسم والقسم حتى لو كان بأسماء مختلفة
+    elif any(k in role_norm for k in ['موظف', 'عامل', 'عضو']):
+        role = 'موظف'
+
+    else:
+        print(f"⚠️ صلاحية غير معروفة: {role_norm}")
+        role = 'موظف'  # افتراضي آمن
+
+   
     name_col = next((c for c in df.columns if 'اسم' in str(c)), 'الاسم')
     dept_col = next((c for c in df.columns if 'قسم' in str(c)), 'القسم')
 
     name_value = str(user.get(name_col, '')).strip()
     dept_value = str(user.get(dept_col, '')).strip()
 
-    # 🧠 في حال الاسم فاضي، نستخرج الاسم من البريد
+   
     if not name_value:
         name_value = email.split('@')[0] if '@' in email else email
 
@@ -262,7 +290,6 @@ def login():
     })
 
 
-# ============== API: جلب الموظفين لكل قسم ==============
 @app.route('/api/get_employees', methods=['POST'])
 def get_employees():
     """
@@ -286,12 +313,10 @@ def get_employees():
         df['الصلاحية'] = df[role_col].astype(str).str.strip()
         df['القسم'] = df[dept_col].astype(str).str.strip()
 
-        # ✅ المنطق الجديد:
-        # إذا المستخدم مدير قسم → يشوف كل الموظفين اللي صلاحيتهم "موظف"
         if manager_name:
             df = df[df['الصلاحية'].isin(['موظف', 'عامل'])]
 
-        # ✅ المدير العام يشوف الكل
+       
         employees = df[['الاسم', 'القسم', 'الصلاحية']].dropna().to_dict(orient='records')
         return jsonify({"success": True, "employees": employees})
 
@@ -300,7 +325,6 @@ def get_employees():
         return jsonify({"success": False, "message": str(e)})
 
 
-# ============== API: الطلبات ==============
 @app.route('/api/get_requests', methods=['POST'])
 def get_requests():
     try:
@@ -317,7 +341,7 @@ def get_requests():
         df['القسم المستلم'] = df['القسم المستلم'].astype(str).str.strip()
         df['الحالة'] = df['الحالة'].astype(str).str.strip()
 
-        # ✅ فلترة مطابقة للنسخة القديمة:
+       
         dept_std = normalize_arabic(dept)
 
         if role == 'موظف':
@@ -335,8 +359,8 @@ def get_requests():
         else:
             filtered = pd.DataFrame()
 
-        # 🔹 إخفاء الحالات المغلقة أو المرفوضة فقط من عرض الصفحة
-        filtered = filtered[~filtered['الحالة'].isin(['مغلق', 'مرفوض'])]
+       
+        filtered = filtered
 
         return jsonify(filtered.fillna('').to_dict(orient='records'))
 
@@ -400,7 +424,7 @@ def create_request():
 
 @app.route('/uploads/<path:filename>')
 def get_uploaded_file(filename):
-    # ✅ يعرض الملف مباشرة داخل المتصفح بدل التحميل
+    
     return send_from_directory(UPLOAD_DIR, filename)
 
 @app.route('/api/update_request_status', methods=['POST'])
@@ -420,17 +444,17 @@ def update_request_status():
         return jsonify({"success": False}), 404
     idx = idx_list[0]
 
-    # ✅ ضمان أن الأعمدة النصية هي من نوع str لتفادي تحذير pandas
+   
     text_cols = ['اسم المستلم', 'بدأ التنفيذ بواسطة', 'أغلق بواسطة', 'آخر تحديث بواسطة', 'الوقت']
     for col in text_cols:
         if col in df.columns:
             df[col] = df[col].astype(str)
 
-    # 🔹 تحديث الحالة والاسم
+    
     df.at[idx, 'الحالة'] = new_status
     df.at[idx, 'آخر تحديث بواسطة'] = updater
 
-    # 🔹 تعيين اسم المستلم فقط إذا لم يكن موجود سابقًا
+   
     if not df.at[idx, 'اسم المستلم']:
         df.at[idx, 'اسم المستلم'] = updater
 
@@ -453,7 +477,7 @@ def update_request_status():
         df.at[idx, 'أغلق بواسطة'] = updater
 
     if new_status == 'معلق':
-        # حفظ وقت الإيقاف المؤقت فقط
+       
         if 'وقت البداية' in df.columns:
             start_str = df.at[idx, 'وقت البداية']
             if start_str:
@@ -469,7 +493,7 @@ def update_request_status():
 def delegate_request():
     data = request.get_json() or {}
 
-    # ✅ يدعم كل أنواع المفاتيح (camelCase أو snake_case)
+    
     req_id = data.get('requestId') or data.get('request_id')
     delegate = data.get('delegate') or data.get('delegateName')
     delegated_by = data.get('delegatedBy') or data.get('delegated_by')
@@ -485,7 +509,7 @@ def delegate_request():
     if not mask.any():
         return jsonify({'success': False, 'message': f'الطلب {req_id} غير موجود'})
 
-    # ✅ تحديث الحقول
+   
     df.loc[mask, 'اسم المستلم'] = delegate
     df.loc[mask, 'آخر تحديث بواسطة'] = delegated_by
     df.loc[mask, 'الحالة'] = 'موكل'
@@ -496,14 +520,10 @@ def delegate_request():
 
 
 
-# ============== API: تصدير الطلبات ==============
+
 @app.route('/api/export_requests', methods=['POST'])
 def export_requests():
-    """
-    📦 تصدير الطلبات إلى ملف Excel يحتوي على عدة أوراق:
-    ✅ فقط الطلبات التي استلمها القسم (القسم المستلم)
-    كل ورقة تمثل حالة من حالات الطلب (جديد، جاري التنفيذ، مغلق، مرفوض، إلخ)
-    """
+    
     try:
         data = request.get_json() or {}
         dept = (data.get('department', '') or '').strip()
@@ -517,7 +537,7 @@ def export_requests():
         if df.empty:
             return jsonify({"success": False, "message": "لا توجد بيانات لتصديرها."})
 
-        # 🧹 تنظيف الأعمدة المهمة
+       
         for col in ['القسم المستلم', 'الحالة', 'التاريخ']:
             if col in df.columns:
                 df[col] = (
@@ -528,11 +548,11 @@ def export_requests():
                     .str.replace('\u200e', '', regex=True)
                 )
 
-        # ✅ فلترة الطلبات التي استلمها القسم فقط
+        
         dept_norm = normalize_arabic(dept)
         df = df[df['القسم المستلم'].apply(lambda x: dept_norm in normalize_arabic(x) or normalize_arabic(x) in dept_norm)]
 
-        # ✅ فلترة حسب التاريخ إن وجد
+        
         if start:
             df = df[pd.to_datetime(df['التاريخ'], errors='coerce') >= pd.to_datetime(start)]
         if end:
@@ -542,10 +562,10 @@ def export_requests():
         if df.empty:
             return jsonify({"success": False, "message": "لا توجد طلبات استلمها القسم ضمن الشروط المحددة."})
 
-        # 🗂️ تقسيم البيانات حسب الحالة
+       
         grouped = {status: sub_df for status, sub_df in df.groupby('الحالة')}
 
-        # 📘 إنشاء ملف Excel بعدة أوراق (كل ورقة = حالة)
+       
         ts = datetime.now().strftime('%Y%m%d_%H%M%S')
         fname = f"طلبات_الواردة_{dept}_{ts}.xlsx".replace(' ', '_')
         fpath = os.path.join(EXPORT_DIR, fname)
@@ -565,7 +585,7 @@ def export_requests():
 def download(filename):
     return send_from_directory(EXPORT_DIR, filename, as_attachment=True)
 
-# ============== API: الشات العام ==============
+
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
     """رد ذكي باستخدام OpenRouter بسرعة أعلى"""
@@ -593,7 +613,7 @@ def chatbot():
             "https://openrouter.ai/api/v1/chat/completions",
             headers=headers,
             json=payload,
-            timeout=15,   # ⏱️ أقصى مهلة للرد 15 ثانية فقط
+            timeout=15,  
         )
 
         if response.status_code == 200:
@@ -613,40 +633,65 @@ def chatbot():
         print("❌ chatbot error:", e)
         return jsonify({"reply": "تعذر الاتصال بخدمة الذكاء الاصطناعي."})
 
-# ============== API: دردشة بين الموظفين ==============
-CHAT_PATH = os.path.join(BASE_DIR, "chats.xlsx")
 
-def load_chats():
-    if not os.path.exists(CHAT_PATH):
-        pd.DataFrame(columns=['رقم الطلب','المرسل','القسم','الرسالة','الوقت']).to_excel(CHAT_PATH,index=False)
-    return pd.read_excel(CHAT_PATH)
+CHAT_UPLOAD_DIR = os.path.join(BASE_DIR, "chat_uploads")
+os.makedirs(CHAT_UPLOAD_DIR, exist_ok=True)
 
-@app.route('/api/chat_send', methods=['POST'])
-def chat_send():
-    data = request.get_json()
-    req_id = data.get('request_id')
-    sender = data.get('sender')
-    dept = data.get('department')
-    msg = data.get('message')
-    if not all([req_id, sender, msg]): return jsonify({"success": False})
+@app.route('/api/chat_send_file', methods=['POST'])
+def chat_send_file():
+    req_id = request.form.get('request_id')
+    sender = request.form.get('sender')
+    dept = request.form.get('department')
+    msg = request.form.get('message', '')
+    file = request.files.get('file')
+    filename = ""
+
+    if file:
+        safe_name = f"{req_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}"
+        path = os.path.join(CHAT_UPLOAD_DIR, safe_name)
+        file.save(path)
+        filename = safe_name
+
     df = load_chats()
     new = pd.DataFrame([{
-        'رقم الطلب': req_id, 'المرسل': sender, 'القسم': dept,
-        'الرسالة': msg, 'الوقت': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        'رقم الطلب': req_id,
+        'المرسل': sender,
+        'القسم': dept,
+        'الرسالة': msg,
+        'الملف': filename,
+        'الوقت': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }])
     df = pd.concat([df, new], ignore_index=True)
-    df.to_excel(CHAT_PATH,index=False)
+    df.to_excel(CHAT_PATH, index=False)
+
+    
+    req_df = load_requests()
+    mask = req_df['رقم الطلب'] == req_id
+    if mask.any():
+        req_df.loc[mask, 'آخر تحديث بواسطة'] = sender
+        save_requests(req_df)
+
     return jsonify({"success": True})
 
-@app.route('/api/chat_get/<req_id>')
+@app.route('/api/chat_get/<req_id>', methods=['GET'])
 def chat_get(req_id):
-    df = load_chats()
-    msgs = df[df['رقم الطلب']==req_id].to_dict(orient='records')
-    return jsonify(msgs)
+    """إرجاع جميع الرسائل الخاصة بطلب محدد"""
+    try:
+        df = load_chats()
+        if df.empty:
+            return jsonify([])
+        msgs = df[df['رقم الطلب'].astype(str) == str(req_id)].fillna('').to_dict(orient='records')
+        return jsonify(msgs)
+    except Exception as e:
+        print("❌ chat_get error:", e)
+        return jsonify([])
 
 
+@app.route('/chat_uploads/<path:filename>')
+def chat_uploads(filename):
+    return send_from_directory(CHAT_UPLOAD_DIR, filename)
 
-# ============== API: استعادة / إعادة تعيين كلمة المرور ==============
+
 @app.route('/api/forgot_reset_password', methods=['POST'])
 def forgot_reset_password():
     """تحديث كلمة المرور عبر البريد الإلكتروني"""
@@ -664,15 +709,15 @@ def forgot_reset_password():
         if 'البريد الإلكتروني' not in df.columns:
             return jsonify({"success": False, "message": "عمود البريد الإلكتروني غير موجود"}), 500
 
-        # 🔹 توحيد البريد الإلكتروني للمقارنة
+        
         df['البريد الإلكتروني'] = df['البريد الإلكتروني'].astype(str).str.lower().str.strip()
 
-        # 🔍 البحث عن المستخدم
+        
         mask = df['البريد الإلكتروني'] == email
         if not mask.any():
             return jsonify({"success": False, "message": "البريد الإلكتروني غير موجود"}), 404
 
-        # ✏️ تحديث كلمة المرور
+       
         df.loc[mask, 'كلمة المرور'] = new_password
         df.to_excel(DB_PATH, index=False)
 
@@ -684,7 +729,111 @@ def forgot_reset_password():
 
 
 
-# ============== التشغيل ==============
+def ensure_users_status_col():
+    """نضيف عمود 'الحالة' لملف المستخدمين لو غير موجود"""
+    try:
+        if not os.path.exists(DB_PATH):
+            return
+        df = pd.read_excel(DB_PATH)
+        if 'الحالة' not in df.columns:
+            df['الحالة'] = 'نشط'
+            df.to_excel(DB_PATH, index=False)
+            print("✅ Added 'الحالة' column to users DB")
+    except Exception as e:
+        print("ensure_users_status_col error:", e)
+
+ensure_users_status_col()
+
+@app.route('/api/hr/list_users', methods=['GET'])
+def hr_list_users():
+    """إرجاع كل المستخدمين مع الإيميل وكلمة المرور (HR فقط في الواجهة الأمامية)"""
+    try:
+        df = load_users()
+        if df.empty:
+            return jsonify([])
+        
+        for col in ['الاسم','الصلاحية','كلمة المرور','البريد الإلكتروني','القسم','الحالة']:
+            if col not in df.columns:
+                df[col] = ''
+        return jsonify(df.fillna('').to_dict(orient='records'))
+    except Exception as e:
+        print("hr_list_users error:", e)
+        return jsonify([]), 500
+
+@app.route('/api/hr/add_user', methods=['POST'])
+def hr_add_user():
+    data = request.get_json() or {}
+    name  = (data.get('name','') or '').strip()
+    role  = (data.get('role','') or '').strip()
+    pwd   = (data.get('password','') or '').strip()
+    email = (data.get('email','') or '').strip().lower()
+    dept  = (data.get('department','') or '').strip()
+    status= (data.get('status','نشط') or 'نشط').strip()
+
+    if not all([name, role, pwd, email, dept]):
+        return jsonify({"success": False, "message": "الحقول مطلوبة"}), 400
+
+    df = load_users()
+ 
+    for col in ['الاسم','الصلاحية','كلمة المرور','البريد الإلكتروني','القسم','الحالة']:
+        if col not in df.columns: df[col] = ''
+
+    if not df[df['البريد الإلكتروني'].astype(str).str.lower().str.strip() == email].empty:
+        return jsonify({"success": False, "message": "البريد موجود مسبقاً"}), 409
+
+    new_row = {
+        'الاسم': name, 'الصلاحية': role, 'كلمة المرور': pwd,
+        'البريد الإلكتروني': email, 'القسم': dept, 'الحالة': status
+    }
+    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+    df.to_excel(DB_PATH, index=False)
+    return jsonify({"success": True})
+
+@app.route('/api/hr/update_user', methods=['POST'])
+def hr_update_user():
+    data = request.get_json() or {}
+    email = (data.get('email','') or '').strip().lower()
+    if not email:
+        return jsonify({"success": False, "message": "البريد مطلوب"}), 400
+
+    fields_map = {
+        'name':'الاسم', 'role':'الصلاحية', 'password':'كلمة المرور',
+        'department':'القسم', 'status':'الحالة'
+    }
+    df = load_users()
+    for col in ['الاسم','الصلاحية','كلمة المرور','البريد الإلكتروني','القسم','الحالة']:
+        if col not in df.columns: df[col] = ''
+    mask = df['البريد الإلكتروني'].astype(str).str.lower().str.strip() == email
+    if not mask.any():
+        return jsonify({"success": False, "message": "المستخدم غير موجود"}), 404
+
+    for k, ar_col in fields_map.items():
+        if k in data and data[k] is not None:
+            df.loc[mask, ar_col] = str(data[k]).strip()
+
+    df.to_excel(DB_PATH, index=False)
+    return jsonify({"success": True})
+
+@app.route('/api/hr/archive_user', methods=['POST'])
+def hr_archive_user():
+    data = request.get_json() or {}
+    email = (data.get('email','') or '').strip().lower()
+    if not email:
+        return jsonify({"success": False, "message": "البريد مطلوب"}), 400
+
+    df = load_users()
+    if 'الحالة' not in df.columns:
+        df['الحالة'] = 'نشط'
+    mask = df['البريد الإلكتروني'].astype(str).str.lower().str.strip() == email
+    if not mask.any():
+        return jsonify({"success": False, "message": "المستخدم غير موجود"}), 404
+
+    df.loc[mask, 'الحالة'] = 'مؤرشف'
+    df.to_excel(DB_PATH, index=False)
+    return jsonify({"success": True})
+
+
+
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
